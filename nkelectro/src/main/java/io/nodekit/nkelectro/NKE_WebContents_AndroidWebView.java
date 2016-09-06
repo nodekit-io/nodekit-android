@@ -1,0 +1,474 @@
+/*
+* nodekit.io
+*
+* Copyright (c) 2016 OffGrid Networks. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+package io.nodekit.nkelectro;
+import android.annotation.SuppressLint;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
+import android.widget.FrameLayout;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import io.nodekit.nkscripting.NKApplication;
+import io.nodekit.nkscripting.NKScriptContext;
+import io.nodekit.nkscripting.NKScriptValue;
+import io.nodekit.nkscripting.engines.androidwebview.NKEngineAndroidWebView;
+import io.nodekit.nkscripting.util.NKLogging;
+
+public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScriptContext.NKScriptContextDelegate {
+
+
+
+    private class AndroidWebViewClient extends WebViewClient {
+        NKE_WebContents_AndroidWebView _parent;
+
+        private AndroidWebViewClient(NKE_WebContents_AndroidWebView parent) {
+            this._parent = parent;
+        }
+
+        @Override
+        public void onPageFinished(WebView view,
+                                   String url) {
+            this._parent.onPageFinished(view, url);
+        }
+
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+            this._parent.onReceivedError(view);
+        }
+
+        @Override
+        public void onLoadResource(WebView view,
+                                   String url)
+        {
+            this._parent.onLoadResource(view, url);
+        }
+    }
+
+    protected WebView webView;
+    private Boolean _isLoading;
+    private HashMap<String, Object> options;
+
+    public NKE_WebContents_AndroidWebView(NKE_BrowserWindow browserWindow) {
+        super(browserWindow);
+    }
+
+    @SuppressLint("setJavaScriptEnabled")
+    public void createWebView(HashMap<String, Object> options)
+    {
+
+        FrameLayout _root = (FrameLayout) NKApplication.getRootView().findViewById(android.R.id.content);
+        FrameLayout mWebContainer = (FrameLayout) _root.getChildAt(0);
+        WebView webView = new WebView(NKApplication.getAppContext());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.setVisibility(View.INVISIBLE);
+        mWebContainer.addView(webView);
+        try {
+            NKEngineAndroidWebView.addJSContextWebView(webView, options, this);
+        } catch (Exception ex) {
+            NKLogging.log(ex.toString());
+        }
+
+        this.webView = webView;
+        _browserWindow.webView = webView;
+    }
+
+    public void NKScriptEngineDidLoad(NKScriptContext context) {
+        _browserWindow.context = context;
+
+        if (!options.containsKey("nke.InstallElectro") || (Boolean) options.get("nke.InstallElectro")) {
+            try {
+                NKE__Boot.addRendererElectro(_browserWindow.context, options);
+            } catch (Exception ex) {
+                NKLogging.log(ex.toString());
+            }
+        }
+
+    }
+
+    public void NKScriptEngineReady(NKScriptContext context)
+    {
+        String url;
+        if (options.containsKey(NKEBrowserOptions.kPreloadURL))
+            url = (String)options.get(NKEBrowserOptions.kPreloadURL);
+        else
+            url = NKEBrowserDefaults.kPreloadURL;
+
+        webView.setWebViewClient(new AndroidWebViewClient(this));
+        webView.loadUrl(url);
+        this.init_IPC();
+
+        this._type = NKEBrowserType.WebView.toString();
+
+         NKLogging.log(String.format("+E%s Renderer Ready", _id));
+
+        _browserWindow.events.emit("NKE.DidFinishLoad", _id);
+
+    }
+
+    public void onLoadResource (WebView view,
+                                String url)
+    {
+        _isLoading = true;
+    }
+
+    public void onPageFinished(WebView sender,
+                               String url) {
+        _isLoading = false;
+
+        _browserWindow.events.emit("NKE.DidFinishLoad", _id);
+
+    }
+
+    public void onReceivedError(WebView view) {
+        _isLoading = false;
+        _browserWindow.events.emit("NKE.DidFailLoading", _id);
+    }
+
+    @Nullable
+    private <T>T itemOrDefault(Map<String, Object> options, String key) {
+        if (options.containsKey(key))
+            return (T)options.get(key);
+        else
+             return null;
+    }
+
+    public void loadURL(String url, Map<String, Object> options)
+    {
+
+        String httpReferrer = itemOrDefault(options, "httpReferrer");
+        String userAgent = itemOrDefault(options, "userAgent");
+        Map<String, String> extraHeaders = itemOrDefault(options, "extraHeaders");
+
+        HashMap<String, String> request = new HashMap<String, String>();
+        if ((userAgent) != null)
+            webView.getSettings().setUserAgentString(userAgent);
+
+        if ((httpReferrer) != null)
+              request.put("Referrer", httpReferrer);
+
+        if ((extraHeaders) != null)
+        {
+            for (String item : extraHeaders.keySet())
+            {
+                request.put(item, extraHeaders.get(item));
+            }
+        }
+
+        webView.loadUrl(url, request);
+    }
+
+    public String getURL()
+    {
+        return webView.getUrl();
+    }
+
+    public String getTitle()
+    {
+        return webView.getTitle();
+    }
+
+    public Boolean isLoading()
+    {
+        return _isLoading;
+    }
+
+    public Boolean canGoBack()
+    {
+        return webView.canGoBack();
+    }
+
+    public Boolean canGoForward()
+    {
+        return webView.canGoForward();
+    }
+
+    public void executeJavaScript(String code, String userGesture) throws Exception
+    {
+        _browserWindow.context.evaluateJavaScript(code, null);
+    }
+
+    public String getUserAgent()
+    {
+        return webView.getSettings().getUserAgentString();
+    }
+
+    public void goBack()
+    {
+        webView.goBack();
+    }
+
+    public void goForward()
+    {
+        webView.goForward();
+    }
+
+    public void reload()
+    {
+        webView.reload();
+    }
+
+    public void reloadIgnoringCache()
+    {
+        webView.loadUrl(webView.getUrl());
+    }
+
+    public void setUserAgent(String userAgent)
+    {
+       throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void stop()
+    {
+        webView.stopLoading();
+    }
+
+    /* ****************************************************************** *
+     *               REMAINDER OF ELECTRO API NOT IMPLEMENTED             *
+     * ****************************************************************** */
+    public NKScriptValue getSession()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void addWorkSpace(String path)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void beginFrameSubscription(NKScriptValue callback)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void canGoToOffset(int offset)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void clearHistory()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void closeDevTools()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void copyclipboard()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void cut()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void delete()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void disableDeviceEmulation()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void downloadURL(String url)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void enableDeviceEmulation(Map<String, Object> parameters)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void endFrameSubscription()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void goToIndex(int index)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void goToOffset(int offset)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void hasServiceWorker(NKScriptValue callback)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void insertCSS(String css)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void inspectElement(int x, int y)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void inspectServiceWorker()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public Boolean isAudioMuted()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void isCrashed()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void isDevToolsFocused()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void isDevToolsOpened()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public Boolean isWaitingForResponse()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void openDevTools(Map<String, Object> options)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void paste()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void pasteAndMatchStyle()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void print(Map<String, Object> options)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void printToPDF(Map<String, Object> options, NKScriptValue callback)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void redo()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void removeWorkSpace(String path)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void replace(String text)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void replaceMisspelling(String text)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void savePage(String fullstring, String saveType, NKScriptValue callback)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void selectAll()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void sendInputEvent(Map<String, Object> e)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void setAudioMuted(Boolean muted)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void toggleDevTools()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void undo()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void unregisterServiceWorker(NKScriptValue callback)
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    public void unselect()
+    {
+        throw new UnsupportedOperationException("Not Implemented");
+    }
+
+    // Event:  'certificate-error'
+    // Event:  'crashed'
+    // Event:  'destroyed'
+    // Event:  'devtools-closed'
+    // Event:  'devtools-focused'
+    // Event:  'devtools-opened'
+    // Event:  'did-frame-finish-load'
+    // Event:  'did-get-redirect-request'
+    // Event:  'did-get-response-details'
+    // Event:  'did-start-loading'
+    // Event:  'did-stop-loading'
+    // Event:  'dom-ready'
+    // Event:  'login'
+    // Event:  'new-window'
+    // Event:  'page-favicon-updated'
+    // Event:  'plugin-crashed'
+    // Event:  'select-client-certificate'
+    // Event:  'will-navigate'
+
+}
+

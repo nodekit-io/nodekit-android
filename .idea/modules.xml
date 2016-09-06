@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nkcore/nkcore.iml" filepath="$PROJECT_DIR$/nkcore/nkcore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nkelectro/nkelectro.iml" filepath="$PROJECT_DIR$/nkelectro/nkelectro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nkscripting/nkscripting.iml" filepath="$PROJECT_DIR$/nkscripting/nkscripting.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nkscriptingbridges/nkscriptingbridges.iml" filepath="$PROJECT_DIR$/nkscriptingbridges/nkscriptingbridges.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nodekit-android.iml" filepath="$PROJECT_DIR$/nodekit-android.iml" />
+    </modules>
+  </component>
+</project>
