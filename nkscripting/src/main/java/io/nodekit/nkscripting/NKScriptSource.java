@@ -29,7 +29,7 @@ public class NKScriptSource
     private boolean injected = false;
     private NKScriptContext _context;
 
-    public NKScriptSource(String source, String asFilename, String ns, String cleanup) throws Exception {
+    public NKScriptSource(String source, String asFilename, String ns, String cleanup) {
         injected = false;
         this.filename = asFilename;
         if (cleanup != null)
@@ -56,11 +56,11 @@ public class NKScriptSource
         }
     }
 
-    public NKScriptSource(String source, String asFilename, String ns) throws Exception {
+    public NKScriptSource(String source, String asFilename, String ns)  {
         this(source, asFilename, ns, null);
     }
 
-    public NKScriptSource(String source, String asFilename) throws Exception {
+    public NKScriptSource(String source, String asFilename)  {
         this(source, asFilename, null, null);
     }
 
@@ -71,14 +71,18 @@ public class NKScriptSource
         NKLogging.log(String.format("+E%s Injected %s ", context.id(), filename));
     }
 
-    public void eject() throws Exception {
+    public void eject() {
         if (!injected)
             return ;
          
         if (_context == null)
             return ;
-         
-        _context.evaluateJavaScript(cleanup,  null);
+
+        try {
+            _context.evaluateJavaScript(cleanup,  null);
+        } catch (Exception ex) {
+            NKLogging.log(ex.toString());
+        }
 
         source = null;
         cleanup = null;

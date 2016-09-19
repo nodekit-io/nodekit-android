@@ -38,41 +38,45 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
                    var syncRef = 0;
     var NKScripting = function NKScriptingObject(channelName) {
 
-        var channel = webkit.messageHandlers[channelName];
-        if (!channel) throw 'channel has not established';
+           if (channelName)
+           {
 
-        if (!channel.postMessageSync)
-                   {
-                   channel.postMessageSync = function(){
-                   var args = arguments;
-                   var obj = args[0]
-                   if (!obj['$opcode'])
-                     return channel.postMessage.apply(this, args);
-                    var id = "s" + syncRef++
-                   obj["$nk.sync"] = true;
-                   obj["$id"] = id;
-                   channel.postMessage.apply(this, args);
-                   return window.prompt("nk.Signal", id);
-                   }
-                   }
-                   
-        Object.defineProperty(this, '$channel', {
-            'configurable': true,
-            'value': channel
-        });
-        Object.defineProperty(this, '$references', {
-            'configurable': true,
-            'value': []
-        });
-        Object.defineProperty(this, '$lastRefID', {
-            'configurable': true,
-            'value': 1,
-            'writable': true
-        });
-                   
-        this.events = {}
-    }
- 
+                   var channel = webkit.messageHandlers[channelName];
+                   if (!channel) throw 'channel has not established';
+
+                   if (!channel.postMessageSync)
+                              {
+                              channel.postMessageSync = function(){
+                              var args = arguments;
+                              var obj = args[0]
+                              if (!obj['$opcode'])
+                                return channel.postMessage.apply(this, args);
+                               var id = "s" + syncRef++
+                              obj["$nk.sync"] = true;
+                              obj["$id"] = id;
+                              channel.postMessage.apply(this, args);
+                              return window.prompt("nk.Signal", id);
+                              }
+                              }
+
+                   Object.defineProperty(this, '$channel', {
+                       'configurable': true,
+                       'value': channel
+                   });
+                   Object.defineProperty(this, '$references', {
+                       'configurable': true,
+                       'value': []
+                   });
+                   Object.defineProperty(this, '$lastRefID', {
+                       'configurable': true,
+                       'value': 1,
+                       'writable': true
+                   });
+           }
+
+           this.events = {}
+       }
+
     exports = NKScripting;
 
     if (typeof window !== 'undefined')
@@ -115,6 +119,21 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             NKScripting.call(base, channelName);
          } else {
             base = new NKScripting(channelName);
+        }
+        return NKScripting.createNamespace(namespace, base);
+    }
+
+    NKScripting.createPluginLite = function(namespace, base) {
+        if (base instanceof Object) {
+            // Plugin is a mixin object which contains both JavaScript and native methods/properties.
+            var properties = {};
+            Object.getOwnPropertyNames(NKScripting.prototype).forEach(function(p) {
+                properties[p] = Object.getOwnPropertyDescriptor(this, p);
+            }, NKScripting.prototype);
+            base.__proto__ = Object.create(Object.getPrototypeOf(base), properties);
+            NKScripting.call(base);
+         } else {
+           throw new Error("NOT A VALID JavascriptInterface Object");
         }
         return NKScripting.createNamespace(namespace, base);
     }

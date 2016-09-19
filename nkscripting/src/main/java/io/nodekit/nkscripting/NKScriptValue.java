@@ -30,8 +30,46 @@ public class NKScriptValue {
 
     public NKScriptContext context;
 
+    protected NKScriptValue _origin = null;
+
+    private static final ThreadLocal contextThreadLocal = new ThreadLocal();
+
+    public static void setCurrentContext(NKScriptContext context) {
+        contextThreadLocal.set(context);
+    }
+
+    public static void unsetCurrentContext() {
+        contextThreadLocal.remove();
+    }
+
+    public static NKScriptContext getCurrentContext() {
+        return (NKScriptContext) contextThreadLocal.get();
+    }
+
+    public NKScriptValue() {}
+
     public NKScriptValue(String namespace, NKScriptContext context)   {
         this.namespace = namespace;
+        this.context = context;
+    }
+
+
+    public NKScriptValue(String namespace, NKScriptContext context, NKScriptValue origin)
+    {
+        this.namespace = namespace;
+        this.context = context;
+        if (origin != null)
+            this._origin = origin;
+        else
+            this._origin = this;
+    }
+
+    // The object is a stub for a JavaScript object which was retained as an argument.
+    private int reference = 0;
+    public NKScriptValue(int reference, NKScriptContext context, NKScriptValue origin)
+    {
+        this.namespace = String.format("%s.$references[%s]", origin.namespace, reference);
+        this.reference = reference;
         this.context = context;
     }
 
@@ -39,7 +77,6 @@ public class NKScriptValue {
         String exp = this.scriptForCallingMethod(null, arguments);
         this.evaluateExpression(exp, completionHandler);
     }
-
 
     public void invokeMethod(String method, Object[] arguments, NKCallback<String> completionHandler) {
         String exp = this.scriptForCallingMethod(method, arguments);

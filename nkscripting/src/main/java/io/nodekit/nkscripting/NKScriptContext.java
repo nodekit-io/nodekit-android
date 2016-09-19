@@ -18,6 +18,7 @@
 
 package io.nodekit.nkscripting;
 
+import io.nodekit.nkscripting.channelbridge.NKScriptMessage;
 import io.nodekit.nkscripting.util.NKCallback;
 
 import java.util.HashMap;
@@ -40,5 +41,11 @@ public interface NKScriptContext
 
         void NKScriptEngineReady(NKScriptContext context);
 
+    }
+
+    interface NKScriptMessageController
+    {
+        void addScriptMessageHandler(NKScriptMessage.NKScriptMessageHandler scriptMessageHandler, String name) throws Exception;
+        void removeScriptMessageHandlerForName(String name) throws Exception;
     }
 }

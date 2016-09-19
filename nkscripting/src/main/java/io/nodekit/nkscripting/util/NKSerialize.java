@@ -16,6 +16,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 package io.nodekit.nkscripting.util;
 
 import android.support.annotation.Nullable;
@@ -24,27 +25,225 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import java.lang.reflect.Field;
+
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.ArrayList;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import 	java.text.SimpleDateFormat;
-
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
 
 @SuppressWarnings("unchecked")
 public class NKSerialize {
+
+    @Nullable
+    public static <T> T deserialize(String json) {
+        try {
+            Object jsonTest = new JSONTokener(json).nextValue();
+            if(jsonTest == JSONObject.NULL) {
+                return null;
+            } else if (jsonTest instanceof JSONObject)
+            {
+                JSONObject jsonObject = new JSONObject(json);
+                return (T)NKSerialize.toMap(jsonObject);
+            }
+            else if (jsonTest instanceof JSONArray) {
+                 JSONArray jsonArray = new JSONArray(json);
+                return (T)NKSerialize.toList(jsonArray);
+            }
+        }  catch (Exception e) {
+            //
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public static Object deserialize(String json, Class type) {
+        try {
+            Object jsonTest = new JSONTokener(json).nextValue();
+            if (jsonTest instanceof JSONObject)
+            {
+                //you have an object
+                JSONObject jsonObject = new JSONObject(json);
+                return NKSerialize.jsonToNative(jsonObject, type);
+            }
+            else if (jsonTest instanceof JSONArray) {
+                //you have an array
+                JSONArray jsonArray = new JSONArray(json);
+                return NKSerialize.jsonArrayToNativeList(jsonArray, type);
+            }
+        }  catch (Exception e) {
+            //
+        }
+
+        return null;
+    }
+
+    protected static Map<String, Object> toMap(JSONObject object)  {
+
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        try {
+
+            Iterator<String> keysItr = object.keys();
+            while(keysItr.hasNext()) {
+                String key = keysItr.next();
+                Object value = object.get(key);
+
+                if(value instanceof JSONArray) {
+                    value = toList((JSONArray) value);
+                }
+
+                else if(value instanceof JSONObject) {
+                    value = toMap((JSONObject) value);
+                }
+
+                map.put(key, value);
+            }
+
+        } catch (Exception ex)
+        {
+            NKLogging.log(ex.toString());
+        }
+
+        return map;
+    }
+
+    protected static List<Object> toList(JSONArray array) throws JSONException {
+
+        List<Object> list = new ArrayList<Object>();
+
+        try {
+
+            for(int i = 0; i < array.length(); i++) {
+                Object value = array.get(i);
+                if(value instanceof JSONArray) {
+                    value = toList((JSONArray) value);
+                }
+
+                else if(value instanceof JSONObject) {
+                    value = toMap((JSONObject) value);
+                }
+                list.add(value);
+            }
+        } catch (Exception ex)
+        {
+            NKLogging.log(ex.toString());
+        }
+
+        return list;
+    }
+
+    public static String serialize(@Nullable Object obj) {
+
+        if (null == obj) {
+            return "undefined";
+        }
+
+        try {
+
+
+            Class type = obj.getClass();
+
+            if (obj instanceof String) {
+                return JSONObject.quote((String) obj);
+            } else if (isNumberType(type)) {
+                return obj.toString();
+            } else if (type == Boolean.class) {
+                return ((Boolean) obj) ? "true" : "false";
+            } else if (type == Date.class) {
+                SimpleDateFormat formatter;
+
+                formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+                return "\"" + formatter.format((Date) obj) + "\"";
+            } else if (obj instanceof Collection<?>) {
+                List<?> list = (List<?>) obj;
+                StringBuilder sb = new StringBuilder();
+                Boolean started = false;
+                for (Object child : list) {
+                    if (!started) {
+                        sb.append("[");
+                        started = true;
+                    } else {
+                        sb.append(",");
+                    }
+                    sb.append(NKSerialize.serialize(child));
+
+                }
+                if (started) {
+                    sb.append("]");
+                }
+                return sb.toString();
+            } else if (obj instanceof Map<?, ?>) {
+                Map<String, ?> map = (Map<String, ?>) obj;
+                StringBuilder sb = new StringBuilder();
+                Boolean started = false;
+                for (String key : map.keySet()) {
+                    if (!started) {
+                        sb.append("{");
+                        started = true;
+                    } else {
+                        sb.append(",");
+                    }
+                    sb.append("\"").append(NKSerialize.serialize(key)).append("\": ").append(NKSerialize.serialize(map.get(key)));
+
+                }
+                if (started) {
+                    sb.append("}");
+                }
+                return sb.toString();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            NKLogging.log(ex.toString());
+        }
+
+        return obj.toString();
+
+    }
+
+    public static String serializeArgs(Object[] list) {
+        StringBuilder sb = new StringBuilder();
+        Boolean started = false;
+        for (Object child : list) {
+            if (!started)
+            {
+                started = true;
+            } else
+            {
+                sb.append(",");
+            }
+            sb.append(NKSerialize.serialize(child));
+
+        }
+        return sb.toString();
+    }
+
+    protected static final Set<Class> NUMBER_TYPES = new HashSet(Arrays.asList(
+            Short.class, Integer.class, Long.class, Float.class, Double.class));
+
+    protected static boolean isNumberType(Class clazz) {
+        return NUMBER_TYPES.contains(clazz);
+    }
 
     // ANNOTATIONS AND INTERFACES
     @Retention(RetentionPolicy.RUNTIME)
@@ -69,138 +268,17 @@ public class NKSerialize {
         T deserialization(String s);
     }
 
-    // STATIC METHODS
-    private static NKSerialize nkSerializer;
 
-    public static NKSerialize getInstance() {
-        if (null != nkSerializer){
-            return nkSerializer;
-        }
-        nkSerializer = new NKSerialize();
-        return nkSerializer;
+    protected static <T> T fromJson(JSONObject jsonObject, Class type) {
+        return NKSerialize.jsonToNative(jsonObject, type);
     }
 
-    @Nullable
-    public static Object deserialize(String json, Class type) {
-        try {
-            Object jsonTest = new JSONTokener(json).nextValue();
-            if (jsonTest instanceof JSONObject)
-            {
-                //you have an object
-                JSONObject jsonObject = new JSONObject(json);
-                return NKSerialize.getInstance().jsonToNative(jsonObject, type);
-            }
-            else if (jsonTest instanceof JSONArray) {
-                //you have an array
-                JSONArray jsonArray = new JSONArray(json);
-                return NKSerialize.getInstance().jsonArrayToNativeList(jsonArray, type);
-            }
-        }  catch (Exception e) {
-           //
-        }
-
-        return null;
+    protected static <T> Collection<T> fromJsonArray(JSONArray array, Class type) {
+        return NKSerialize.jsonArrayToNativeList(array,type);
     }
 
-    public static String serializeArgs(Object[] list) {
-        StringBuilder sb = new StringBuilder();
-        Boolean started = false;
-        for (Object child : list) {
-            if (!started)
-            {
-                 started = true;
-            } else
-            {
-                sb.append(",");
-            }
-            sb.append(NKSerialize.serialize(child));
-
-        }
-        return sb.toString();
-    }
-
-    public static  String serialize(@Nullable Object obj) {
-
-        if (null == obj) {
-            return "undefined";
-        }
-
-        Class type = obj.getClass();
-
-        if (obj instanceof String)
-        {
-            return JSONObject.quote((String) obj);
-        } else if (isNumberType(type))
-        {
-            return obj.toString();
-        } else if (type == Boolean.class)
-        {
-            return ((Boolean)obj) ? "true" : "false";
-        } else if (type == Date.class)
-        {
-            SimpleDateFormat formatter;
-
-            formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-            return "\"" + formatter.format((Date) obj) + "\"";
-        } else if (obj instanceof Collection<?>)
-        {
-            List<?> list = (List<?>) obj;
-            StringBuilder sb = new StringBuilder();
-            Boolean started = false;
-            for (Object child : list) {
-                if (!started)
-                {
-                    sb.append("[");
-                    started = true;
-                } else
-                {
-                    sb.append(",");
-                }
-                sb.append(NKSerialize.serialize(child));
-
-            }
-            if (started)
-            {
-                sb.append("]");
-            }
-            return sb.toString();
-        } else if (obj instanceof Map<?,?>) {
-            Map<String,?> map = (Map<String,?>) obj;
-            StringBuilder sb = new StringBuilder();
-            Boolean started = false;
-            for (String key : map.keySet()) {
-                if (!started)
-                {
-                    sb.append("{");
-                    started = true;
-                } else
-                {
-                    sb.append(",");
-                }
-                sb.append("\"").append(NKSerialize.serialize(key)).append("\": ").append(NKSerialize.serialize(map.get(key)));
-
-            }
-            if (started)
-            {
-                sb.append("}");
-            }
-            return sb.toString();
-        }
-
-        return obj.toString();
-
-    }
-
-    public static <T> T fromJson(JSONObject jsonObject, Class type) {
-        return NKSerialize.getInstance().jsonToNative(jsonObject, type);
-    }
-
-    public static <T> Collection<T> fromJsonArray(JSONArray array, Class type) {
-        return NKSerialize.getInstance().jsonArrayToNativeList(array,type);
-    }
-
-    public static <T> JSONObject toJson(T t){
-        return NKSerialize.getInstance().nativeToJson(t);
+    protected static <T> JSONObject toJson(T t){
+        return NKSerialize.nativeToJson(t);
     }
 
     private static final Set<Class> WRAPPER_TYPES = new HashSet(Arrays.asList(
@@ -210,15 +288,9 @@ public class NKSerialize {
         return WRAPPER_TYPES.contains(clazz);
     }
 
-    private static final Set<Class> NUMBER_TYPES = new HashSet(Arrays.asList(
-            Short.class, Integer.class, Long.class, Float.class, Double.class));
-
-    private static boolean isNumberType(Class clazz) {
-        return NUMBER_TYPES.contains(clazz);
-    }
 
     @Nullable
-    private <T> T jsonToNative(JSONObject jsonObject, Class type) {
+    private static <T> T jsonToNative(JSONObject jsonObject, Class type) {
         T t = null;
         try {
             t = (T) type.newInstance();
@@ -232,7 +304,7 @@ public class NKSerialize {
         return null;
     }
 
-    private <T> Collection<T> jsonArrayToNativeList(JSONArray array, Class type) {
+    private static <T> Collection<T> jsonArrayToNativeList(JSONArray array, Class type) {
         Collection collection = new ArrayList<>();
         BasicType basicType = isBasicType(type);
         try {
@@ -247,7 +319,7 @@ public class NKSerialize {
         return collection;
     }
 
-    private <T> JSONObject nativeToJson(T t) {
+    private static <T> JSONObject nativeToJson(T t) {
         JSONObject jsonObject = new JSONObject();
         Field[] fields = t.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -271,7 +343,7 @@ public class NKSerialize {
     }
 
 
-    private <T> T parseEntity(JSONObject jsonObject, T t) {
+    private static <T> T parseEntity(JSONObject jsonObject, T t) {
         Field[] fields = t.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (!field.isAnnotationPresent(SerializeIgnore.class)) {
@@ -281,7 +353,7 @@ public class NKSerialize {
         return t;
     }
 
-    private <T> void parseField(Field field, JSONObject jsonObject, T t) {
+    private static <T> void parseField(Field field, JSONObject jsonObject, T t) {
         field.setAccessible(true);
         Type fieldType = field.getType();
         Type fieldGenericType = field.getGenericType();
@@ -328,7 +400,7 @@ public class NKSerialize {
         }
     }
 
-    private Collection setCollectionCustomValue(
+    private static  Collection setCollectionCustomValue(
             Collection collection, JSONArray jsonArray, Type genericType) throws JSONException {
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -339,7 +411,7 @@ public class NKSerialize {
         return collection;
     }
 
-    private Collection setCollectionBasicValue(
+    private static  Collection setCollectionBasicValue(
             Collection collection, JSONArray jsonArray, Type genericType) throws JSONException {
         for (int i = 0; i < jsonArray.length(); i++) {
             collection.add(((Class) genericType).cast(jsonArray.get(i)));
@@ -347,7 +419,7 @@ public class NKSerialize {
         return collection;
     }
 
-    private <T> void setCustomValue(Field field, JSONObject jsonObject, T t,
+    private static <T> void setCustomValue(Field field, JSONObject jsonObject, T t,
                                     Type fieldType, String fieldName) throws Exception {
         JSONObject value = jsonObject.getJSONObject(fieldName);
         Object o = generateInstance(fieldType);
@@ -355,7 +427,7 @@ public class NKSerialize {
         field.set(t, o);
     }
 
-    private <T> void setBasicValue(Field field, JSONObject jsonObject,
+    private static <T> void setBasicValue(Field field, JSONObject jsonObject,
                                    T t, String fieldName, BasicType basicType) throws Exception {
         Object value = null;
         switch (basicType) {
@@ -386,7 +458,7 @@ public class NKSerialize {
     }
 
     @Nullable
-    private Object generateInstance(Type type) {
+    private static Object generateInstance(Type type) {
         Class<?> genericsType = null;
         try {
             genericsType = Class.forName(getClassName(type));
@@ -398,8 +470,8 @@ public class NKSerialize {
         }
     }
 
-    static String CLASS_PREFIX = "class ";
-    static String INTERFACE_PREFIX = "interface ";
+    protected static String CLASS_PREFIX = "class ";
+    protected static String INTERFACE_PREFIX = "interface ";
 
     private static String getClassName(Type type) {
         String fullName = type.toString();
@@ -410,7 +482,7 @@ public class NKSerialize {
         return fullName;
     }
 
-    private BasicType isBasicType(Type type) {
+    private static BasicType isBasicType(Type type) {
         if (type == int.class || type == Integer.class) {
             return BasicType.INT;
         }
@@ -433,12 +505,12 @@ public class NKSerialize {
         }
     }
 
-    private enum BasicType {
+    private static enum BasicType {
         INT, LONG, BOOLEAN, DOUBLE,
         FLOAT, STRING, OTHER_TYPE
     }
 
-    private <T> Object parseFieldValue(Field field, T t) throws Exception {
+    private static <T> Object parseFieldValue(Field field, T t) throws Exception {
         if (field.isAnnotationPresent(SerializeBy.class)) {
             Class s = field.getAnnotation(SerializeBy.class).value();
             Serializer serializer = (Serializer) s.newInstance();

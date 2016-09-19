@@ -19,7 +19,7 @@ import io.nodekit.nkscripting.util.NKStorage;
 
 public class NKE__Boot {
 
-     public static void addRendererElectro(NKScriptContext context, Map<String, Object> options) throws Exception
+    public static void addRendererElectro(NKScriptContext context, Map<String, Object> options) throws Exception
     {
         String appjs = NKStorage.getResource("lib_electro/_nke_renderer.js");
         String script = "function loadbootstrap(){\n" + appjs + "\n}\n" + "loadbootstrap();" + "\n";

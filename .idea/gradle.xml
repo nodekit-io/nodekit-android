@@ -5,7 +5,7 @@
       <GradleProjectSettings>
         <option name="distributionType" value="LOCAL" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleHome" value="C:\Program Files\Android\Android Studio\gradle\gradle-2.14.1" />
+        <option name="gradleHome" value="$APPLICATION_HOME_DIR$/gradle/gradle-2.14.1" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/nkcore" />
             <option value="$PROJECT_DIR$/nkelectro" />
             <option value="$PROJECT_DIR$/nkscripting" />
-            <option value="$PROJECT_DIR$/nkscriptingbridges" />
           </set>
         </option>
         <option name="myModules">
@@ -23,7 +22,6 @@
             <option value="$PROJECT_DIR$/nkcore" />
             <option value="$PROJECT_DIR$/nkelectro" />
             <option value="$PROJECT_DIR$/nkscripting" />
-            <option value="$PROJECT_DIR$/nkscriptingbridges" />
           </set>
         </option>
       </GradleProjectSettings>

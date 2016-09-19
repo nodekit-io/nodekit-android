@@ -52,7 +52,7 @@ public final class NKE_App implements NKScriptExport
 
     private static NKEventEmitter events = NKEventEmitter.global;
 
-    private void initWithJSValue(NKScriptValue jsv)  {
+    private void initWithJSValue(NKScriptValue jsv) throws Exception {
 
         this.jsValue = jsv;
 

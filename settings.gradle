@@ -1,1 +1,1 @@
-include ':app', ':nkscripting', ':nkscriptingbridges', ':nkelectro', ':nkcore'
+include ':app', ':nkscripting', ':nkelectro', ':nkcore'

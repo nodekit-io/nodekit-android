@@ -26,6 +26,39 @@ public interface NKScriptExport
         String rewriteGeneratedStub( String stub, String forKey);
     }
 
+    public class Proxy<T> implements Overrides
+    {
+        private Overrides plugin;
+
+        public Proxy(Object plugin){
+
+            if (plugin instanceof Overrides) {
+                this.plugin = (Overrides)plugin;
+            } else
+            {
+                this.plugin = null;
+            }
+
+        }
+
+        public String rewriteGeneratedStub(String stub, String forKey)
+        {
+            if (plugin != null)
+                return plugin.rewriteGeneratedStub(stub, forKey);
+            else
+            return stub;
+        }
+
+    }
+
+    public enum NKScriptExportType
+    {
+        NKScriptExport,
+        // Custom Channelbridge provided by NKScripting
+        JavascriptInterface
+        // Native webview interface provided by Android OS
+    }
+
 }
 
 
