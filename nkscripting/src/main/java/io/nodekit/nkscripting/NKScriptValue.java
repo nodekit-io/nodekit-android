@@ -32,7 +32,7 @@ public class NKScriptValue {
 
     protected NKScriptValue _origin = null;
 
-    private static final ThreadLocal contextThreadLocal = new ThreadLocal();
+    private static final ThreadLocal<NKScriptContext> contextThreadLocal = new ThreadLocal<NKScriptContext>();
 
     public static void setCurrentContext(NKScriptContext context) {
         contextThreadLocal.set(context);
@@ -43,7 +43,7 @@ public class NKScriptValue {
     }
 
     public static NKScriptContext getCurrentContext() {
-        return (NKScriptContext) contextThreadLocal.get();
+        return contextThreadLocal.get();
     }
 
     public NKScriptValue() {}
