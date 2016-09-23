@@ -21,15 +21,16 @@ package io.nodekit.nkelectro;
 import android.webkit.JavascriptInterface;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import io.nodekit.nkscripting.NKScriptValue;
 import io.nodekit.nkscripting.util.NKEventEmitter;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.util.NKEventHandler;
 
-public final class NKE_IpcMain   
+final class NKE_IpcMain
 {
-    public static void attachTo(NKScriptContext context, HashMap<String, Object> appOptions) throws Exception {
+    public static void attachTo(NKScriptContext context, Map<String, Object> appOptions) throws Exception {
 
         HashMap<String,Object> options = new HashMap<String, Object>();
 

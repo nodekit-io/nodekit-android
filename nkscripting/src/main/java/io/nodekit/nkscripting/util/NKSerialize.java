@@ -68,7 +68,7 @@ public class NKSerialize {
                 return (T)NKSerialize.toList(jsonArray);
             }
         }  catch (Exception e) {
-            //
+            NKLogging.log(e);
         }
 
         return null;
@@ -90,7 +90,7 @@ public class NKSerialize {
                 return NKSerialize.jsonArrayToNativeList(jsonArray, type);
             }
         }  catch (Exception e) {
-            //
+            NKLogging.log(e);
         }
 
         return null;
@@ -118,9 +118,9 @@ public class NKSerialize {
                 map.put(key, value);
             }
 
-        } catch (Exception ex)
+        } catch (Exception e)
         {
-            NKLogging.log(ex.toString());
+            NKLogging.log(e);
         }
 
         return map;
@@ -143,9 +143,9 @@ public class NKSerialize {
                 }
                 list.add(value);
             }
-        } catch (Exception ex)
+        } catch (Exception e)
         {
-            NKLogging.log(ex.toString());
+            NKLogging.log(e);
         }
 
         return list;
@@ -212,9 +212,9 @@ public class NKSerialize {
             }
 
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            NKLogging.log(ex.toString());
+            NKLogging.log(e);
         }
 
         return obj.toString();
@@ -295,7 +295,7 @@ public class NKSerialize {
         try {
             t = (T) type.newInstance();
         } catch (Exception e) {
-            e.printStackTrace();
+            NKLogging.log(e);
         }
         if (null != t) {
             t = parseEntity(jsonObject, t);
@@ -465,7 +465,7 @@ public class NKSerialize {
             Object o = genericsType.newInstance();
             return o;
         } catch (Exception e) {
-            e.printStackTrace();
+            NKLogging.log(e);
             return null;
         }
     }

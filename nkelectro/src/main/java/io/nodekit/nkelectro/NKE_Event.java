@@ -18,34 +18,39 @@
 
 package io.nodekit.nkelectro;
 
-import java.util.HashMap;
+import android.webkit.JavascriptInterface;
 
-public class NKE_Event extends HashMap<String, Object>
+import java.util.HashMap;
+import java.util.Map;
+
+import io.nodekit.nkscripting.NKScriptExport;
+
+class NKE_Event extends HashMap<String, Object>
 {
-    public int getsender()  {
+    int getsender()  {
         return (int)this.get("sender");
     }
 
-    public String getchannel()  {
+    String getchannel()  {
         return (String)this.get("channel");
     }
 
-    public String getreplyId()  {
+    String getreplyId()  {
         return (String)this.get("replyId");
     }
 
-    public Object[] getarg() {
+    Object[] getarg() {
         return (Object[])this.get("arg");
     }
 
-    public NKE_Event(int sender, String channel, String replyId, Object[] arg)  {
+    NKE_Event(int sender, String channel, String replyId, Object[] arg)  {
         this.put("sender", sender);
         this.put("channel", channel);
         this.put("replyId", replyId);
         this.put("arg", arg);
     }
 
-    public NKE_Event(HashMap<String, Object> dict) {
+    public NKE_Event(Map<String, Object> dict) {
         this.put("sender", dict.get("sender"));
         this.put("channel", dict.get("channel"));
         this.put("replyId", dict.get("replyId"));

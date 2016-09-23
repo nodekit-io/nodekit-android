@@ -20,6 +20,8 @@ package io.nodekit.nkscripting;
 
 import android.support.annotation.Nullable;
 
+import java.util.HashMap;
+
 import io.nodekit.nkscripting.util.NKCallback;
 import io.nodekit.nkscripting.util.NKLogging;
 import io.nodekit.nkscripting.util.NKSerialize;
@@ -179,19 +181,44 @@ public class NKScriptValue {
         try {
 
             this.context.evaluateJavaScript(expression, completionHandler);
-        } catch (Exception ex) {
-             NKLogging.log(ex.toString());
+        } catch (Exception e) {
+             NKLogging.log(e);
              if (null != completionHandler)
                  completionHandler.onReceiveValue(null);
         }
 
     }
 
-  //  private String scriptForRetaining(String script)  {
+    private String scriptForRetaining(String script)
+    {
+        return (_origin != null) ? String.format("%s.$retainObject(%s)", _origin.namespace, script) : script;
+    }
 
-   // internal func wrapScriptObject(object: AnyObject!) -> AnyObject! {
+    // STATIC METHODS FOR ANY OBJECT
+    private static HashMap<Object, NKScriptValue> objScriptValue = new HashMap<Object, NKScriptValue>();
 
-    // Private JavaScript scripts and helpers
+    public static NKScriptValue getForObject(Object obj)
+    {
+
+        return objScriptValue.containsKey(obj) ? objScriptValue.get(obj) : null;
+    }
+
+    public static void invokeMethodForObject(Object obj, String method, Object[] arguments)
+    {
+
+       if (objScriptValue.containsKey(obj))
+        {
+            objScriptValue.get(obj).invokeMethod(method, arguments);
+        }
+    }
+
+    public static void setForObject(Object obj, NKScriptValue value)
+    {
+        if (value != null)
+            objScriptValue.put(obj, value);
+        else
+            objScriptValue.remove(obj);
+    }
 
 }
 

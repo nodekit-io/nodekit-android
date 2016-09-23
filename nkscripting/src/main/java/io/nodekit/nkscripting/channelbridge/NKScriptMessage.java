@@ -22,10 +22,17 @@ import java.util.Map;
 
 public class NKScriptMessage
 {
-    public interface NKScriptMessageHandler
+    public interface Handler
     {
         void didReceiveScriptMessage(NKScriptMessage message)  ;
         Object didReceiveScriptMessageSync(NKScriptMessage message)  ;
+    }
+
+
+    public interface Controller
+    {
+        void addScriptMessageHandler(Handler scriptMessageHandler, String name) throws Exception;
+        void removeScriptMessageHandlerForName(String name) throws Exception;
     }
 
     public Object body;

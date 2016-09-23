@@ -20,34 +20,50 @@ package io.nodekit.nkscripting.channelbridge;
 
 import io.nodekit.nkscripting.util.NKCallback;
 import io.nodekit.nkscripting.NKScriptValue;
-import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.channelbridge.NKScriptTypeInfo.NKScriptTypeInfoMemberInfo;
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Map;
 
-public class NKScriptValueNative extends NKScriptValue {
+class NKScriptValueNative extends NKScriptValue {
 
     private NKScriptInvocation proxy;
 
-    public Object nativeObject;
+    Object nativeObject;
 
-     protected NKScriptChannel _channel;
-    protected int _instanceid = 0;
-    public NKScriptChannel getchannel() throws Exception {
-        return _channel;
-    }
+    private NKScriptChannel _channel;
+    private int _instanceid = 0;
 
-    public NKScriptValueNative(String ns, NKScriptChannel channel, int instanceid, Object obj) {
+    NKScriptValueNative(String ns, NKScriptChannel channel, int instanceid, Object obj) {
         super(ns, channel.context, null);
         this._channel = channel;
         this._instanceid = instanceid;
         this.proxy = bindObject(obj);
     }
 
-    protected NKScriptValueNative(String ns, NKScriptChannel channel)  {
+    // Create new instance of plugin for given channel
+    NKScriptValueNative(String ns, NKScriptChannel channel, int instanceid, Object[] args, boolean create)  {
+        super(ns, channel.context, null);
+        if (!create)
+            throw new IllegalArgumentException();
+
+        this._channel = channel;
+        this._instanceid = instanceid;
+        Class cls = channel.typeInfo.getType();
+        NKScriptTypeInfoMemberInfo constructor = channel.typeInfo.defaultConstructor();
+
+        Object[] argsWrapped = wrapArgs(args);
+        NKScriptValue promise = null;
+
+        int arity = constructor.arity;
+
+        Object instance = NKScriptInvocation.construct(cls, constructor.getconstructor(), argsWrapped);
+
+        proxy = bindObject(instance);
+    }
+
+   /* protected NKScriptValueNative(String ns, NKScriptChannel channel)  {
         super(ns, channel.context, null);
     }
 
@@ -77,45 +93,25 @@ public class NKScriptValueNative extends NKScriptValue {
 
         channel.addInstance(id, this);
         proxy = bindObject(value);
-    }
-
-    // Create new instance of plugin for given channel
-    public NKScriptValueNative(String ns, NKScriptChannel channel, int instanceid, Object[] args, boolean create)  {
-        super(ns, channel.context, null);
-        if (!create)
-            throw new IllegalArgumentException();
-
-        this._channel = channel;
-        this._instanceid = instanceid;
-        Class cls = channel.typeInfo.getType();
-        NKScriptTypeInfoMemberInfo constructor = channel.typeInfo.defaultConstructor();
-
-        Object[] argsWrapped = wrapArgs(args);
-        NKScriptValue promise = null;
+    } */
 
 
-        int arity = constructor.arity;
-
-        Object instance = NKScriptInvocation.construct(cls, constructor.getconstructor(), argsWrapped);
-
-        proxy = bindObject(instance);
-    }
 
     private NKScriptInvocation bindObject(Object obj) {
         nativeObject = obj;
         NKScriptInvocation proxy = new NKScriptInvocation(obj);
-        setObjectNKScriptValue(obj, this);
+        NKScriptValue.setForObject(obj, this);
         return proxy;
     }
 
     private void unbindObject(Object obj) throws Exception {
         _channel.removeInstance(_instanceid);
         nativeObject = null;
-        setObjectNKScriptValue(obj, null);
+        NKScriptValue.setForObject(obj, null);
         proxy = null;
     }
 
-    public void invokeNativeMethod(String method, Object[] args, NKCallback<Object> callback) {
+    void invokeNativeMethod(String method, Object[] args, NKCallback<Object> callback) {
         if (proxy == null)
         {
             return;
@@ -131,7 +127,7 @@ public class NKScriptValueNative extends NKScriptValue {
         callback.onReceiveValue(null);
     }
 
-    public Object invokeNativeMethodSync(String method, Object[] args)  {
+    Object invokeNativeMethodSync(String method, Object[] args)  {
 
         if (proxy == null)
         {
@@ -149,7 +145,7 @@ public class NKScriptValueNative extends NKScriptValue {
 
     }
 
-    protected Object[] wrapArgs(Object[] args) {
+    private Object[] wrapArgs(Object[] args) {
 
         ArrayList<Object> result = new ArrayList<Object>();
 
@@ -157,11 +153,13 @@ public class NKScriptValueNative extends NKScriptValue {
             result.add(wrapScriptObject(obj));
         }
 
+        result.add(this);
+
         return result.toArray();
     }
 
     @SuppressWarnings("unchecked")
-    protected Object wrapScriptObject(Object obj)
+    private Object wrapScriptObject(Object obj)
     {
         if (obj == null)
             return null;
@@ -211,21 +209,5 @@ public class NKScriptValueNative extends NKScriptValue {
         this.invokeMethod(method, arguments, null);
     }
 
-    // STATIC METHODS FOR ANY OBJECT
 
-    private static HashMap<Object, NKScriptValue> objScriptValue = new HashMap<Object, NKScriptValue>();
-
-    public static NKScriptValue getObjectNKScriptValue(Object obj)
-    {
-        return objScriptValue.containsKey(obj) ? objScriptValue.get(obj) : null;
-    }
-
-    static void setObjectNKScriptValue(Object obj, NKScriptValue value)
-    {
-        if (value != null)
-            objScriptValue.put(obj, value);
-        else
-            objScriptValue.remove(obj);
-    }
 }
-

@@ -20,6 +20,7 @@ package io.nodekit.nkelectro;
 import android.annotation.SuppressLint;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebResourceRequest;
@@ -35,9 +36,15 @@ import io.nodekit.nkscripting.NKScriptValue;
 import io.nodekit.nkscripting.engines.androidwebview.NKEngineAndroidWebView;
 import io.nodekit.nkscripting.util.NKLogging;
 
-public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScriptContext.NKScriptContextDelegate {
+class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScriptContext.NKScriptContextDelegate {
 
+    static void attachTo(NKScriptContext context, Map<String, Object> appOptions) throws Exception {
+        HashMap<String,Object> options = new HashMap<String, Object>();
+        options.put("js","lib_electro/webcontents.js");
 
+        NKE_WebContents principal1 = new NKE_WebContents_AndroidWebView();
+        context.loadPlugin(principal1, "io.nodekit.electro.WebContents", options);
+    }
 
     private class AndroidWebViewClient extends WebViewClient {
         NKE_WebContents_AndroidWebView _parent;
@@ -65,11 +72,15 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
         }
     }
 
-    protected WebView webView;
+    private WebView webView;
     private Boolean _isLoading;
     private HashMap<String, Object> options;
 
-    public NKE_WebContents_AndroidWebView(NKE_BrowserWindow browserWindow) {
+    private NKE_WebContents_AndroidWebView() {
+        super();
+    }
+
+    NKE_WebContents_AndroidWebView(NKE_BrowserWindow browserWindow) {
         super(browserWindow);
     }
 
@@ -85,8 +96,8 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
         mWebContainer.addView(webView);
         try {
             NKEngineAndroidWebView.addJSContextWebView(webView, options, this);
-        } catch (Exception ex) {
-            NKLogging.log(ex.toString());
+        } catch (Exception e) {
+            NKLogging.log(e);
         }
 
         this.webView = webView;
@@ -98,9 +109,9 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
 
         if (!options.containsKey("nke.InstallElectro") || (Boolean) options.get("nke.InstallElectro")) {
             try {
-                NKE__Boot.addRendererElectro(_browserWindow.context, options);
-            } catch (Exception ex) {
-                NKLogging.log(ex.toString());
+                NKElectro.addToRendererContext(_browserWindow.context, options);
+            } catch (Exception e) {
+                NKLogging.log(e);
             }
         }
 
@@ -109,16 +120,14 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
     public void NKScriptEngineReady(NKScriptContext context)
     {
         String url;
-        if (options.containsKey(NKEBrowserOptions.kPreloadURL))
-            url = (String)options.get(NKEBrowserOptions.kPreloadURL);
+        if (options.containsKey(NKE_BrowserWindow.Options.kPreloadURL))
+            url = (String)options.get(NKE_BrowserWindow.Options.kPreloadURL);
         else
-            url = NKEBrowserDefaults.kPreloadURL;
+            url = "about:blank";
 
         webView.setWebViewClient(new AndroidWebViewClient(this));
         webView.loadUrl(url);
         this.init_IPC();
-
-        this._type = NKEBrowserType.WebView.toString();
 
          NKLogging.log(String.format("+E%s Renderer Ready", _id));
 
@@ -126,13 +135,15 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
 
     }
 
-    public void onLoadResource (WebView view,
+    // Android WebView Client Delegate Methods
+
+    private void onLoadResource (WebView view,
                                 String url)
     {
         _isLoading = true;
     }
 
-    public void onPageFinished(WebView sender,
+    private  void onPageFinished(WebView sender,
                                String url) {
         _isLoading = false;
 
@@ -140,11 +151,14 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
 
     }
 
-    public void onReceivedError(WebView view) {
+    private void onReceivedError(WebView view) {
         _isLoading = false;
         _browserWindow.events.emit("NKE.DidFailLoading", _id);
     }
 
+    // Helper Methods
+
+    @SuppressWarnings("unchecked")
     @Nullable
     private <T>T itemOrDefault(Map<String, Object> options, String key) {
         if (options.containsKey(key))
@@ -153,6 +167,10 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
              return null;
     }
 
+    // JavaScript Public Methods (for instance)
+
+
+    @JavascriptInterface
     public void loadURL(String url, Map<String, Object> options)
     {
 
@@ -178,66 +196,79 @@ public class NKE_WebContents_AndroidWebView extends NKE_WebContents implements N
         webView.loadUrl(url, request);
     }
 
+    @JavascriptInterface
     public String getURL()
     {
         return webView.getUrl();
     }
 
+    @JavascriptInterface
     public String getTitle()
     {
         return webView.getTitle();
     }
 
+    @JavascriptInterface
     public Boolean isLoading()
     {
         return _isLoading;
     }
 
+    @JavascriptInterface
     public Boolean canGoBack()
     {
         return webView.canGoBack();
     }
 
+    @JavascriptInterface
     public Boolean canGoForward()
     {
         return webView.canGoForward();
     }
 
+    @JavascriptInterface
     public void executeJavaScript(String code, String userGesture) throws Exception
     {
         _browserWindow.context.evaluateJavaScript(code, null);
     }
 
+    @JavascriptInterface
     public String getUserAgent()
     {
         return webView.getSettings().getUserAgentString();
     }
 
+    @JavascriptInterface
     public void goBack()
     {
         webView.goBack();
     }
 
+    @JavascriptInterface
     public void goForward()
     {
         webView.goForward();
     }
 
+    @JavascriptInterface
     public void reload()
     {
         webView.reload();
     }
 
+    @JavascriptInterface
     public void reloadIgnoringCache()
     {
         webView.loadUrl(webView.getUrl());
     }
 
+    @JavascriptInterface
     public void setUserAgent(String userAgent)
     {
        throw new UnsupportedOperationException("Not Implemented");
     }
 
+    @JavascriptInterface
     public void stop()
     {
         webView.stopLoading();

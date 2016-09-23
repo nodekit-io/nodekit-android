@@ -19,41 +19,37 @@
 package io.nodekit.nkelectro;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKScriptValue;
-import io.nodekit.nkscripting.util.NKEventEmitter;
 import io.nodekit.nkscripting.util.NKEventHandler;
 
-public abstract class NKE_WebContents {
+abstract class NKE_WebContents {
 
-    protected NKE_BrowserWindow _browserWindow;
-    protected int _id;
-    protected String _type;
-    protected NKEventEmitter globalEvents = NKEventEmitter.global;
-    protected NKScriptValue jsValue;
+    NKE_BrowserWindow _browserWindow;
 
-    public NKE_WebContents(NKE_BrowserWindow browserWindow)
+    int _id;
+
+    NKE_WebContents() {}
+
+    NKE_WebContents(NKE_BrowserWindow browserWindow)
     {
         this._browserWindow = browserWindow;
-        this._id = browserWindow.getid();
-    }
-
-    public void initWithJSValue(NKScriptValue jsv) {
-
-        this.jsValue = jsv;
+        this._id = browserWindow.id();
 
         // Event:  'did-fail-load'
         // Event:  'did-finish-load'
 
         _browserWindow.events.on("NKE.DidFinishLoad", new NKEventHandler<String>() {
             protected void call(String event, String item) {
-                jsValue.invokeMethod("emit", new String[]{"did-finish-load"});
+                NKScriptValue.invokeMethodForObject(this, "emit", new String[]{"did-finish-load"});
             }
         });
 
         _browserWindow.events.on("NKE.DidFailLoading", new NKEventHandler<String>() {
             protected void call(String event, String item) {
-                jsValue.invokeMethod("emit", new String[]{"did-fail-loading"});
+                NKScriptValue.invokeMethodForObject(this, "emit", new String[]{"did-fail-loading"});
             }
         });
 
@@ -61,11 +57,11 @@ public abstract class NKE_WebContents {
 
     abstract public void createWebView(HashMap<String, Object> options);
 
-    protected void init_IPC()
+    void init_IPC()
     {
         _browserWindow.events.on("NKE.IPCReplytoMain", new NKEventHandler<NKE_Event>() {
             protected void call(String event, NKE_Event item) {
-                jsValue.invokeMethod("emit", new Object[]{"NKE.IPCReplytoMain", item.getsender(), item.getchannel(), item.getreplyId(), item.getarg()[0]});
+                NKScriptValue.invokeMethodForObject(this, "emit", new Object[]{"NKE.IPCReplytoMain", item.getsender(), item.getchannel(), item.getreplyId(), item.getarg()[0]});
             }
         });
     }

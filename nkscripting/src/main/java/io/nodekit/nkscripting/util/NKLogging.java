@@ -28,4 +28,9 @@ public class NKLogging {
     {
         Log.v(TAG, message);
     }
+
+    public static void log(Exception e)
+    {
+        Log.v(TAG, e.toString());
+    }
 }

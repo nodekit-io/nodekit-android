@@ -19,28 +19,26 @@
 package io.nodekit.nkscripting.channelbridge;
 
 import io.nodekit.nkscripting.*;
-import io.nodekit.nkscripting.NKScriptContext.NKScriptMessageController;
 import io.nodekit.nkscripting.util.*;
-import io.nodekit.nkscripting.channelbridge.NKScriptMessage.NKScriptMessageHandler;
 import io.nodekit.nkscripting.channelbridge.NKScriptTypeInfo.NKScriptTypeInfoMemberInfo;
 import java.util.*;
 import android.util.SparseArray;
 
-public class NKScriptChannel implements NKScriptMessageHandler {
+public class NKScriptChannel implements NKScriptMessage.Handler {
 
-    protected String id;
-    protected Boolean isFactory = false;
-    protected Boolean isRemote = false;
-    protected NKScriptValueNative _principal;
+    private String id;
+    private Boolean isFactory = false;
+    private Boolean isRemote = false;
+    private NKScriptValueNative _principal;
 
-    protected static HashMap<String, NKScriptChannel> _channels = new HashMap<String, NKScriptChannel>();
+    private static HashMap<String, NKScriptChannel> _channels = new HashMap<String, NKScriptChannel>();
 
-    protected SparseArray<NKScriptValueNative> _instances = new SparseArray<NKScriptValueNative>();
-    protected static SparseArray<NKScriptChannel> _instanceChannels = new SparseArray<NKScriptChannel>();
+    private SparseArray<NKScriptValueNative> _instances = new SparseArray<NKScriptValueNative>();
+    private static SparseArray<NKScriptChannel> _instanceChannels = new SparseArray<NKScriptChannel>();
 
     // Internal variables and helpers
-    protected static int nativeFirstSequence = java.lang.Integer.MAX_VALUE;
-    protected static int sequenceNumber = 0;
+    private static int nativeFirstSequence = java.lang.Integer.MAX_VALUE;
+    private static int sequenceNumber = 0;
 
     // Public properties
     public NKScriptContext context;
@@ -56,15 +54,16 @@ public class NKScriptChannel implements NKScriptMessageHandler {
     }
 
     // Public methods
-    public <T> NKScriptValue bindPluginClass(Class<T> pluginType, String ns) throws Exception {
+    public <T> NKScriptValue bindPluginClass(Class<T> pluginType, String namespace) throws Exception {
 
         setObjectNKScriptChannel(context, this);
 
         if ((this.id != null) || (context == null) ) return null;
 
+        this.ns = namespace;
         this.id = Integer.toString(NKScriptChannel.sequenceNumber++);
 
-        ((NKScriptMessageController)context).addScriptMessageHandler(this, id);
+        ((NKScriptMessage.Controller)context).addScriptMessageHandler(this, id);
 
         // Class, not instance, passed to bindPlugin -- to be used in Factory constructor/instance pattern in js
         String name = pluginType.getName();
@@ -76,11 +75,11 @@ public class NKScriptChannel implements NKScriptMessageHandler {
         // Need to store the channel on the class itself so it can be found when native construct requests come in from other plugins
         setObjectNKScriptChannel(pluginType, this);
 
-        _principal = new NKScriptValueNative(ns, this, 0, pluginType);
+        _principal = new NKScriptValueNative(this.ns, this, 0, pluginType);
 
         this._instances.put(0, _principal);
-        _channels.put(ns, this);
-        NKScriptValueNative.setObjectNKScriptValue(pluginType, _principal);
+        _channels.put(this.ns, this);
+        NKScriptValue.setForObject(pluginType, _principal);
 
         NKScriptExport.Proxy export = new NKScriptExport.Proxy(pluginType);
 
@@ -92,15 +91,16 @@ public class NKScriptChannel implements NKScriptMessageHandler {
 
         // Public methods
     @SuppressWarnings("unchecked")
-    public <T> NKScriptValue bindPlugin(T plugin, String ns, HashMap<String, Object> options)  throws Exception {
+    public <T> NKScriptValue bindPlugin(T plugin, String namespace, HashMap<String, Object> options)  throws Exception {
 
         setObjectNKScriptChannel(context, this);
 
         if ((this.id != null) || (context == null) ) return null;
 
         this.id = Integer.toString(NKScriptChannel.sequenceNumber++);
+        this.ns = namespace;
 
-        ((NKScriptMessageController)context).addScriptMessageHandler(this, id);
+        ((NKScriptMessage.Controller)context).addScriptMessageHandler(this, id);
 
         // Instance of Princpal passed to bindPlugin -- to be used in singleton/static pattern in js
         Class<T> pluginType = (Class<T>)plugin.getClass();
@@ -109,11 +109,11 @@ public class NKScriptChannel implements NKScriptMessageHandler {
         isFactory = false;
         typeInfo = new NKScriptTypeInfo<T>(plugin, pluginType);
 
-        _principal = new NKScriptValueNative(ns, this, 0, plugin);
+        _principal = new NKScriptValueNative(this.ns, this, 0, plugin);
 
         this._instances.put(0, _principal);
-        _channels.put(ns, this);
-        NKScriptValueNative.setObjectNKScriptValue(plugin, _principal);
+        _channels.put(this.ns, this);
+        NKScriptValue.setForObject(plugin, _principal);
 
         NKScriptExport.Proxy export = new NKScriptExport.Proxy(pluginType);
 
@@ -149,11 +149,11 @@ public class NKScriptChannel implements NKScriptMessageHandler {
       _instanceChannels.delete(id);
 
         if (singleInstance)
-            NKEventEmitter.global.emit("NKS.SingleInstanceComplete", ns);
+            NKEventEmitter.global.emit("NKS.SingleInstanceComplete", this.ns);
 
     }
 
-    protected void unbind()
+    private void unbind()
     {
         if (_channels.containsKey(ns))
             _channels.remove(ns);
@@ -170,9 +170,9 @@ public class NKScriptChannel implements NKScriptMessageHandler {
         _principal = null;
 
         try {
-            ((NKScriptMessageController)context).removeScriptMessageHandlerForName(id);
-        } catch (Exception ex) {
-            NKLogging.log(ex.toString());
+            ((NKScriptMessage.Controller)context).removeScriptMessageHandlerForName(id);
+        } catch (Exception e) {
+            NKLogging.log(e);
         }
 
 
@@ -189,7 +189,6 @@ public class NKScriptChannel implements NKScriptMessageHandler {
 
         // thread static
         NKScriptValue.setCurrentContext(this.context);
-
         if (message.body instanceof Map<?,?>) {
             Map<String, Object> body = (Map<String, Object>) message.body;
             if (body.containsKey("$opcode")) {
@@ -202,7 +201,7 @@ public class NKScriptChannel implements NKScriptMessageHandler {
                             // Dispose plugin
                             this.unbind();
                         } else {
-                            NKScriptValueNative.setObjectNKScriptValue(obj, null);
+                    //        setObjectNKScriptValue(obj, null);
                             _instances.remove(target);
                         }
                     } else if (typeInfo.containsMethod(opcode)) {
@@ -215,12 +214,12 @@ public class NKScriptChannel implements NKScriptMessageHandler {
                 } else if (opcode.equals("+")) {
                     // Create instance
                     Object[] args = (Object[]) body.get("$operand");
-                    String nsInstance = String.format(Locale.US, "%s[%d]", ns, target);
+                    String nsInstance = String.format(Locale.US, "%s[%d]", this.ns, target);
                     _instances.put(target, new NKScriptValueNative(nsInstance, this, target, args, true));
                 } else {
                     // else Unknown opcode
-                    if (NKScriptMessageHandler.class.isAssignableFrom(_principal.nativeObject.getClass())) {
-                        NKScriptMessageHandler obj = (NKScriptMessageHandler) _principal.nativeObject;
+                    if (NKScriptMessage.Handler.class.isAssignableFrom(_principal.nativeObject.getClass())) {
+                        NKScriptMessage.Handler obj = (NKScriptMessage.Handler) _principal.nativeObject;
                         obj.didReceiveScriptMessage(message);
                     } else {
                         // discard unknown message
@@ -287,15 +286,15 @@ public class NKScriptChannel implements NKScriptMessageHandler {
                 {
                     // Create instance
                     Object[] args = (Object[]) body.get("$operand");
-                    String nsInstance = String.format(Locale.US, "%s[%d]", ns, target);
+                    String nsInstance = String.format(Locale.US, "%s[%d]", this.ns, target);
                     _instances.put(target, new NKScriptValueNative(nsInstance, this, target, args, true));
                     result = true;
                 }
                 else
                 {
                     // else Unknown opcode
-                    if (NKScriptMessageHandler.class.isAssignableFrom(_principal.nativeObject.getClass())) {
-                        NKScriptMessageHandler obj = (NKScriptMessageHandler) _principal.nativeObject;
+                    if (NKScriptMessage.Handler.class.isAssignableFrom(_principal.nativeObject.getClass())) {
+                        NKScriptMessage.Handler obj = (NKScriptMessage.Handler) _principal.nativeObject;
                         result = obj.didReceiveScriptMessageSync(message);
                     }
                     else
@@ -362,13 +361,15 @@ public class NKScriptChannel implements NKScriptMessageHandler {
         }
 
         String localstub = export.rewriteGeneratedStub(stubs.toString(), ".local");
-        String globalstubber = "(function(exports) {\n" + localstub + "})(NKScripting.createPlugin('" + id + "', '" + ns + "', " + basestub + "));\n";
+        String globalstubber = "(function(exports) {\n" + localstub + "})(NKScripting.createPlugin('" + id + "', '" + this.ns + "', " + basestub + "));\n";
 
+        NKLogging.log(globalstubber);
         return export.rewriteGeneratedStub( globalstubber, ".global");
     }
 
-
+    // STATIC METHODS FOR ANY OBJECT
     private static HashMap<Object, NKScriptChannel> objScriptChannel = new HashMap<Object, NKScriptChannel>();
+    private static HashMap<Object, NKScriptValue> objScriptValue = new HashMap<Object, NKScriptValue>();
 
     public static NKScriptChannel getObjectNKScriptChannel(Object obj)
     {
@@ -382,5 +383,6 @@ public class NKScriptChannel implements NKScriptMessageHandler {
         else
             objScriptChannel.remove(obj);
     }
+
 }
 

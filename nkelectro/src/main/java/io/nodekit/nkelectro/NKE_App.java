@@ -29,11 +29,12 @@ import io.nodekit.nkscripting.util.NKEventHandler;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKScriptValue;
 import java.util.HashMap;
+import java.util.Map;
 import io.nodekit.nkscripting.util.NKLogging;
 
-public final class NKE_App implements NKScriptExport
+final class NKE_App implements NKScriptExport
 {
-    public static void attachTo(NKScriptContext context, HashMap<String, Object> appOptions) throws Exception {
+    static void attachTo(NKScriptContext context, Map<String, Object> appOptions) throws Exception {
 
         HashMap<String,Object> options = new HashMap<String, Object>();
 
@@ -202,7 +203,6 @@ public final class NKE_App implements NKScriptExport
     public void setUserTasks(HashMap<String, Object> tasks) {
 
     }
-
 
     private String getSpecialPath(String name)  {
 

@@ -22,10 +22,16 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.HashMap;
+
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKApplication;
 import io.nodekit.nkscripting.NKScriptContextFactory;
+import io.nodekit.nkscripting.NKScriptSource;
 import io.nodekit.nkscripting.util.NKLogging;
+
+import io.nodekit.nkelectro.NKElectro;
+import io.nodekit.nkscripting.util.NKStorage;
 
 public class MainActivity extends Activity implements NKScriptContext.NKScriptContextDelegate {
 
@@ -43,12 +49,30 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
         }
     }
 
-    public void NKScriptEngineDidLoad(NKScriptContext context){
+    public void NKScriptEngineDidLoad(NKScriptContext context) {
         NKLogging.log("ScriptEngine Loaded");
+
+        HashMap<String, Object> optionsDefault = new HashMap<String, Object>();
+        try {
+            NKElectro.addToContext(context, optionsDefault);
+        } catch (Exception e) {
+            NKLogging.log(e);
+        }
+
     }
 
     public void NKScriptEngineReady(NKScriptContext context) {
         NKLogging.log("ScriptEngine Ready");
+
+        String appjs = NKStorage.getResource("app/index.js");
+        String script = "function loadbootstrap(){\n" + appjs + "\n}\n" + "loadbootstrap();" + "\n";
+        NKScriptSource scriptsource = new NKScriptSource(script, "index.js", "io.nodekit.app", null);
+
+        try {
+            context.injectJavaScript(scriptsource);
+        } catch (Exception e) {
+            NKLogging.log(e);
+        }
     }
 
 }

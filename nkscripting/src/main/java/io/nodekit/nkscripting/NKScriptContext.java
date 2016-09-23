@@ -43,9 +43,4 @@ public interface NKScriptContext
 
     }
 
-    interface NKScriptMessageController
-    {
-        void addScriptMessageHandler(NKScriptMessage.NKScriptMessageHandler scriptMessageHandler, String name) throws Exception;
-        void removeScriptMessageHandlerForName(String name) throws Exception;
-    }
 }

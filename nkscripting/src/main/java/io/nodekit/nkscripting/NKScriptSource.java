@@ -80,8 +80,8 @@ public class NKScriptSource
 
         try {
             _context.evaluateJavaScript(cleanup,  null);
-        } catch (Exception ex) {
-            NKLogging.log(ex.toString());
+        } catch (Exception e) {
+            NKLogging.log(e);
         }
 
         source = null;

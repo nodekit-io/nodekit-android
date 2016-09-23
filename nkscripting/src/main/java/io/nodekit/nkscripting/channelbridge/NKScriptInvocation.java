@@ -20,16 +20,15 @@ package io.nodekit.nkscripting.channelbridge;
 
 import java.lang.reflect.*;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 import io.nodekit.nkscripting.util.NKLogging;
 import io.nodekit.nkscripting.util.NKCallback;
 
-public class NKScriptInvocation
+class NKScriptInvocation
 {
-    public final Object target;
-    public final Class targetClass;
+    final Object target;
+    final Class targetClass;
 
-    public NKScriptInvocation(Object obj) {
+    NKScriptInvocation(Object obj) {
 
         Class t = obj.getClass();
         if (t == Class.class)
@@ -44,36 +43,36 @@ public class NKScriptInvocation
 
     }
 
-    public static Object construct(Class target, Constructor constructor, Object[] args) {
+    static Object construct(Class target, Constructor constructor, Object[] args) {
         try {
             return constructor.newInstance(args);
-        } catch (Exception ex)
+        } catch (Exception e)
         {
-            NKLogging.log(ex.toString());
+            NKLogging.log(e);
             return null;
         }
 
     }
 
-    public Object call(Method method, Object[] args)  {
+    Object call(Method method, Object[] args)  {
         try {
-            return method.invoke(target, args);
+           return method.invoke(target, args);
             // return method.invoke(target, unwrapArgs(method, args));
-        } catch (Exception ex)
+        } catch (Exception e)
         {
-            NKLogging.log(ex.toString());
+            NKLogging.log(e);
             return null;
         }
     }
 
-    public void callAsync(Method method, Object[] args, NKCallback callback)  {
+    void callAsync(Method method, Object[] args, NKCallback callback)  {
         try {
 
             method.invoke(target, args, callback);
             //  method.invoke(target, unwrapArgs(method, args), callback);
-        } catch (Exception ex)
+        } catch (Exception e)
         {
-            NKLogging.log(ex.toString());
+            NKLogging.log(e);
         }
     }
 

@@ -19,10 +19,21 @@
 this.process = this.process || {}
 var process = this.process;
 
-process.platform = process.platform || "darwin"
+process.platform = process.platform || "android"
 process.type = "main"
 process.versions = {}
 
 this.console = this.console || function () { };
 
 console.log = function(msg) { NKScriptingBridge.log( msg );  }
+
+NKScripting.serialize = true;
+
+NKScripting.getMessageHandlers = function (name) {
+    return {
+        'postMessage': function (message) { NKScriptingBridge.didReceiveScriptMessage(name, JSON.stringify(message)) },
+        'postMessageSync': function (message) { NKScriptingBridge.didReceiveScriptMessageSync(name, JSON.stringify(message)) }
+    };
+}
+
+console.log("+WebView: Android JavaScript Engine Initialized");

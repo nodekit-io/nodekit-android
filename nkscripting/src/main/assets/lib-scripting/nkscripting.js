@@ -23,12 +23,12 @@ var exports;
 var NKScripting = (function NKScriptingRunOnce(exports) {
     var global = this;
     
-   global.onerror = function(msg, url, line, col, err) {
+   /*global.onerror = function(msg, url, line, col, err) {
           if (err)
             console.error(err.stack || err.toString())
           else
-            console.error('Error: ' + msg + ' Script: ' + url + ' Line: ' + lineNumber);
-      };
+            console.error('Error: ' + msg + ' Script: ' + url + ' Line: ' + line);
+      };*/
 
     this.Blob = (typeof Blob === 'undefined') ? {} : Blob;
     this.File = (typeof File === 'undefined') ? {} : File;
@@ -41,8 +41,8 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
            if (channelName)
            {
 
-                   var channel = webkit.messageHandlers[channelName];
-                   if (!channel) throw 'channel has not established';
+                    var channel = webkit.messageHandlers[channelName];
+                    if (!channel) throw 'channel ' + channelName + ' has not established';
 
                    if (!channel.postMessageSync)
                               {
@@ -80,14 +80,18 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
     exports = NKScripting;
 
     if (typeof window !== 'undefined')
-                   {
+    {
         if (window.webkit)
             this.webkit = webkit;
         else
             this.webkit = NKScripting;
                    }
     else
-        this.webkit = NKScripting;
+    {
+        this.webkit = {};
+        this.webkit.messageHandlers = NKScripting.messageHandlers;
+     }
+
 
 
     NKScripting.messageHandlers = {};
@@ -97,13 +101,16 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             if (i < a.length - 1)
                 return (p[c] = p[c] || {});
             if (p[c] instanceof NKScripting)
+            {
                 p[c].dispose();
+                }
             return (p[c] = object || {});
         }
         return namespace.split('.').reduce(callback, global);
     }
 
     NKScripting.createPlugin = function(channelName, namespace, base) {
+    console.log(channelName + ":" + namespace + ":" + base);
         if (typeof(base) === "string") {
             // Plugin object is a constructor
             return NKScripting.createConstructor(channelName, namespace, base);
@@ -144,6 +151,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             var ctor = this.constructor;
         //    while (ctor[ctor.$lastInstID] != undefined)
                 ++ctor.$lastInstID;
+                      console.log("CTOR" + ctor.$lastInstID);
             Object.defineProperty(this, '$instanceID', {'configurable': true,'value': ctor.$lastInstID});
             Object.defineProperty(this, '$properties', {'configurable': true, 'value': {}});
             ctor[this.$instanceID] = this;
@@ -168,6 +176,8 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             delete this.$lastInstID;
         }
      ctor.NKcreateForNative = function(idString) {
+      console.log("CREATE FOR NATIVE" + idString);
+
         var id = idString + 0;
         var instance = Object.create(proto, {
                 '$instanceID': {'configurable': true,'value': id},
@@ -312,6 +322,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             this.$lastRefID = refid;
         },
         dispose: function() {
+        console.log("DISPOSING" + this.$instanceID);
             this.$channel.postMessage({
                 '$opcode': '-',
                 '$target': this.$instanceID

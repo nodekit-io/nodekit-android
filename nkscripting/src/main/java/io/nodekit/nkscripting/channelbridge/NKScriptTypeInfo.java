@@ -22,21 +22,23 @@ import java.lang.reflect.*;
 import java.util.*;
 import android.webkit.JavascriptInterface;
 import io.nodekit.nkscripting.util.NKCallback;
+import io.nodekit.nkscripting.util.NKLogging;
 
 
-public class NKScriptTypeInfo<T> {
+class NKScriptTypeInfo<T> {
 
     private Class<T> _pluginType;
     private T _instance;
     private Map<String, NKScriptTypeInfoMemberInfo> _members;
 
-    public NKScriptTypeInfo(Class<T> pluginType)  {
+    NKScriptTypeInfo(Class<T> pluginType)  {
 
         _pluginType = pluginType;
         try {
             Constructor<T> ctor = _pluginType.getConstructor();
             _instance= ctor.newInstance();
-        } catch (Exception ex) {
+        } catch (Exception e) {
+            NKLogging.log(e);
             _instance = null;
         }
 
@@ -44,7 +46,7 @@ public class NKScriptTypeInfo<T> {
 
     }
 
-    public NKScriptTypeInfo(T instance, Class<T> pluginType)  {
+    NKScriptTypeInfo(T instance, Class<T> pluginType)  {
 
         _pluginType = pluginType;
         _instance = instance;
@@ -64,7 +66,7 @@ public class NKScriptTypeInfo<T> {
 
                 {
                     NKScriptTypeInfoMemberInfo member = new NKScriptTypeInfoMemberInfo(c);
-                    _members.put(member.name, member);
+                    _members.put(member.key, member);
                 }
             }
         }
@@ -81,31 +83,31 @@ public class NKScriptTypeInfo<T> {
         }
     }
 
-    public Class getType()  {
+    Class getType()  {
         return _pluginType;
     }
 
-    public NKScriptTypeInfoMemberInfo item(String item) {
+    NKScriptTypeInfoMemberInfo item(String item) {
         return _members.get(item);
     }
 
-    public Collection<NKScriptTypeInfoMemberInfo> getitems() {
+    Collection<NKScriptTypeInfoMemberInfo> getitems() {
         return _members.values();
     }
 
-    public NKScriptTypeInfoMemberInfo defaultConstructor() {
+    NKScriptTypeInfoMemberInfo defaultConstructor() {
         return _members.get("");
     }
 
-    public boolean containsMethod(String item) {
+    boolean containsMethod(String item) {
         return _members.containsKey(item);
     }
 
-    public boolean containsConstructor(String item)  {
+    boolean containsConstructor(String item)  {
         return _members.containsKey(item);
     }
 
-    public static String[] instanceMethods(Class clazz) {
+    static String[] instanceMethods(Class clazz) {
         List<String> result = new ArrayList<String>();
         while (clazz != null) {
             for (Method method : clazz.getDeclaredMethods()) {
@@ -119,16 +121,16 @@ public class NKScriptTypeInfo<T> {
         return result.toArray(new String[result.size()]);
     }
 
-    protected enum MemberType
+    private enum MemberType
     {
         Method,
         Constructor
     }
 
-    public class NKScriptTypeInfoMemberInfo
+    class NKScriptTypeInfoMemberInfo
     {
 
-        public NKScriptTypeInfoMemberInfo(Constructor constructor)  {
+        NKScriptTypeInfoMemberInfo(Constructor constructor)  {
             _memberType = MemberType.Constructor;
             _constructor = constructor;
 
@@ -141,6 +143,7 @@ public class NKScriptTypeInfo<T> {
 
             StringBuilder sb = new StringBuilder();
             Boolean started = false;
+            int argno = 0;
             for (Class param : params) {
                 if (!started)
                 {
@@ -149,13 +152,14 @@ public class NKScriptTypeInfo<T> {
                 {
                     sb.append(":");
                 }
-                sb.append(param.getName());
+                sb.append("arg" + argno++ + param.getSimpleName().toLowerCase());
+
             }
             key = sb.toString();
 
         }
 
-        public NKScriptTypeInfoMemberInfo(Method method) {
+        NKScriptTypeInfoMemberInfo(Method method) {
 
             _memberType = MemberType.Method;
             _method = method;
@@ -169,6 +173,7 @@ public class NKScriptTypeInfo<T> {
             isVoid = (_method.getReturnType().equals(Void.TYPE));
 
             StringBuilder sb = new StringBuilder();
+            int argno = 0;
             Boolean started = false;
             for (Class param : params) {
                 if (!started)
@@ -178,7 +183,8 @@ public class NKScriptTypeInfo<T> {
                 {
                     sb.append(":");
                 }
-                sb.append(param.getName());
+
+                sb.append("arg" + argno++ + param.getSimpleName().toLowerCase());
 
                 if (param == NKCallback.class)
                 {
@@ -189,33 +195,33 @@ public class NKScriptTypeInfo<T> {
 
         }
 
-        public int arity;
-        public boolean isVoid;
-        public boolean isAsyncCallback;
-        public String name;
-        public String key;
+        int arity;
+        boolean isVoid;
+        boolean isAsyncCallback;
+        String name;
+        String key;
 
-        protected MemberType _memberType;
-        protected Method _method;
-        protected Constructor _constructor;
+        private MemberType _memberType;
+        private Method _method;
+        private Constructor _constructor;
 
-        public boolean isMethod() {
+        boolean isMethod() {
             return (_memberType == MemberType.Method);
         }
 
-        public boolean isConstructor() {
+        boolean isConstructor() {
             return (_memberType == MemberType.Constructor);
         }
 
-        public Method getmethod() {
+        Method getmethod() {
             return _method;
         }
 
-        public Constructor getconstructor() {
+        Constructor getconstructor() {
             return _constructor;
         }
 
-        public String getNKScriptingjsType() {
+        String getNKScriptingjsType() {
             int _arity = arity;
             switch(this._memberType)
             {
