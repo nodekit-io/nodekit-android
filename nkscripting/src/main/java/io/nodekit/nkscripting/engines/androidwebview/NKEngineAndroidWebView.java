@@ -172,13 +172,13 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         String script1 = NKStorage.getResource("lib-scripting/nkscripting.js");
 
-        this.injectExecuteJavaScript(new NKScriptSource(script1, "io.nodekit.scripting/NKScripting/nkscripting.js", "nkscripting"));
+        this.injectJavaScript(new NKScriptSource(script1, "io.nodekit.scripting/NKScripting/nkscripting.js", "nkscripting"));
 
         String appjs = NKStorage.getResource("lib-scripting/init_androidwebview.js");
 
         String script2 = "function loadinit(){\n" + appjs + "\n}\n" + "loadinit();" + "\n";
 
-        this.injectExecuteJavaScript(new NKScriptSource(script2, "io.nodekit.scripting/init_androidwebview", "io.nodekit.scripting.init"));
+        this.injectJavaScript(new NKScriptSource(script2, "io.nodekit.scripting/init_androidwebview", "io.nodekit.scripting.init"));
 
         String script3 = NKStorage.getResource("lib-scripting/promise.js");
 
@@ -187,7 +187,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
             return;
         }
 
-        this.injectExecuteJavaScript(new NKScriptSource(script3, "io.nodekit.scripting/NKScripting/promise.js", "Promise"));
+        this.injectJavaScript(new NKScriptSource(script3, "io.nodekit.scripting/NKScripting/promise.js", "Promise"));
 
         NKStorage.attachTo(this);
 
@@ -214,6 +214,14 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
                 NKScriptChannel channel = new NKScriptChannel((NKScriptContext) this);
 
+                if (plugin instanceof Class)
+                {
+                    scriptValue = channel.bindPluginClass((Class)plugin, ns, options);
+                } else
+                {
+                    scriptValue = channel.bindPlugin(plugin, ns, options);
+                }
+
                 scriptValue = channel.bindPlugin(plugin, ns, options);
 
                 _injectedPlugins.add(scriptValue);
@@ -234,7 +242,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
                 NKLogging.log(String.format("+Plugin object %s is bound to %s (%s) with JavascriptInterface channel", plugin, ns, nsobj));
 
-                String globalstubber = "NKScripting.createPluginLite(\"" + ns + "\", " + nsobj + ");\n function plugin" + _id + "(){\n" + js + "\n}\n" + "plugin" + _id + "();" + "\n";
+                String globalstubber = "NKScripting.createProjection(\"" + ns + "\", " + nsobj + ");\n function plugin" + _id + "(){\n" + js + "\n}\n" + "plugin" + _id + "();" + "\n";
 
                 this.injectJavaScript(new NKScriptSource(globalstubber, jspath));
 
@@ -261,9 +269,9 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         this._sourceList.add(source);
     }
 
-    private void injectExecuteJavaScript(NKScriptSource source) throws Exception {
-        source.inject(this);
-    }
+   // private void injectExecuteJavaScript(NKScriptSource source) throws Exception {
+   //     source.inject(this);
+  //  }
 
     public String serialize(Object obj) throws Exception {
         return NKSerialize.serialize(obj);
@@ -271,10 +279,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
     public void addScriptMessageHandler(NKScriptMessage.Handler scriptMessageHandler, String name) throws Exception {
         _scriptMessageHandlers.put(name, scriptMessageHandler);
-          String script = "NKScripting.messageHandlers['" + name + "'] = NKScripting.getMessageHandlers('" + name + "');";
-          this.evaluateJavaScript(script, null);
-          NKLogging.log("ADDED MESSAGE HANDLER " + script);
-    }
+     }
 
     public void removeScriptMessageHandlerForName(String name)  throws Exception
     {

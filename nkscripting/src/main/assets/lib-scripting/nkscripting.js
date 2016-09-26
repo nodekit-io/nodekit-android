@@ -42,9 +42,9 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
            {
 
                     var channel = webkit.messageHandlers[channelName];
-                    if (!channel) throw 'channel ' + channelName + ' has not established';
+                    if (!channel) channel = NKScripting.getMessageHandlers(channelName);
 
-                   if (!channel.postMessageSync)
+                    if (!channel.postMessageSync)
                               {
                               channel.postMessageSync = function(){
                               var args = arguments;
@@ -110,7 +110,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
     }
 
     NKScripting.createPlugin = function(channelName, namespace, base) {
-    console.log(channelName + ":" + namespace + ":" + base);
+        console.log(channelName + ":" + namespace + ":" + base);
         if (typeof(base) === "string") {
             // Plugin object is a constructor
             return NKScripting.createConstructor(channelName, namespace, base);
@@ -130,7 +130,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
         return NKScripting.createNamespace(namespace, base);
     }
 
-    NKScripting.createPluginLite = function(namespace, base) {
+    NKScripting.createProjection = function(namespace, base) {
         if (base instanceof Object) {
             // Plugin is a mixin object which contains both JavaScript and native methods/properties.
             var properties = {};

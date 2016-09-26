@@ -44,7 +44,6 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
     public NKScriptContext context;
     public String ns;
     public NKScriptTypeInfo typeInfo;
-    public Boolean singleInstance = false;
 
 
     // Public constructors
@@ -54,7 +53,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
     }
 
     // Public methods
-    public <T> NKScriptValue bindPluginClass(Class<T> pluginType, String namespace) throws Exception {
+    public <T> NKScriptValue bindPluginClass(Class<T> pluginType, String namespace, HashMap<String, Object> options) throws Exception {
 
         setObjectNKScriptChannel(context, this);
 
@@ -62,14 +61,14 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
 
         this.ns = namespace;
         this.id = Integer.toString(NKScriptChannel.sequenceNumber++);
+        this.isFactory = true;
 
         ((NKScriptMessage.Controller)context).addScriptMessageHandler(this, id);
 
         // Class, not instance, passed to bindPlugin -- to be used in Factory constructor/instance pattern in js
         String name = pluginType.getName();
 
-        isFactory = true;
-        typeInfo = new NKScriptTypeInfo<T>(pluginType);
+         typeInfo = new NKScriptTypeInfo<T>(pluginType);
 
 
         // Need to store the channel on the class itself so it can be found when native construct requests come in from other plugins
@@ -99,6 +98,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
 
         this.id = Integer.toString(NKScriptChannel.sequenceNumber++);
         this.ns = namespace;
+        this.isFactory = false;
 
         ((NKScriptMessage.Controller)context).addScriptMessageHandler(this, id);
 
@@ -106,8 +106,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
         Class<T> pluginType = (Class<T>)plugin.getClass();
         String name = pluginType.getName();
 
-        isFactory = false;
-        typeInfo = new NKScriptTypeInfo<T>(plugin, pluginType);
+         typeInfo = new NKScriptTypeInfo<T>(plugin, pluginType);
 
         _principal = new NKScriptValueNative(this.ns, this, 0, plugin);
 
@@ -148,7 +147,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
 
       _instanceChannels.delete(id);
 
-        if (singleInstance)
+        if (!isFactory)
             NKEventEmitter.global.emit("NKS.SingleInstanceComplete", this.ns);
 
     }
@@ -322,7 +321,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
 
     private String _generateStubs(NKScriptExport.Proxy export, String name)
     {
-        Boolean prebind = !typeInfo.containsConstructor("");
+        Boolean prebind = !this.isFactory;
         StringBuilder stubs = new StringBuilder();
 
         for (Object obj : typeInfo.getitems())
@@ -350,7 +349,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
         }
 
         String basestub;
-        if (typeInfo.containsConstructor(""))
+        if (this.isFactory)
         {
             NKScriptTypeInfoMemberInfo constructor = typeInfo.defaultConstructor();
             // basestub = generateMethod("\(member.type)", this: "arguments.callee", prebind: false)

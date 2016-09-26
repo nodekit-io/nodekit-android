@@ -24,19 +24,24 @@ import android.webkit.JavascriptInterface;
 import io.nodekit.nkscripting.util.NKCallback;
 import io.nodekit.nkscripting.util.NKLogging;
 
-
+@SuppressWarnings("unchecked")
 class NKScriptTypeInfo<T> {
 
     private Class<T> _pluginType;
     private T _instance;
     private Map<String, NKScriptTypeInfoMemberInfo> _members;
+    private NKScriptTypeInfoMemberInfo _defaultConstructor;
 
     NKScriptTypeInfo(Class<T> pluginType)  {
 
         _pluginType = pluginType;
+        _defaultConstructor = null;
+
+
         try {
-            Constructor<T> ctor = _pluginType.getConstructor();
-            _instance= ctor.newInstance();
+            Constructor ctor= _pluginType.getDeclaredConstructors()[0];
+            ctor.setAccessible(true);
+         _instance= (T)(ctor.newInstance());
         } catch (Exception e) {
             NKLogging.log(e);
             _instance = null;
@@ -67,6 +72,11 @@ class NKScriptTypeInfo<T> {
                 {
                     NKScriptTypeInfoMemberInfo member = new NKScriptTypeInfoMemberInfo(c);
                     _members.put(member.key, member);
+
+                    if (_defaultConstructor == null || member.key == "")
+                    {
+                        _defaultConstructor = member;
+                    }
                 }
             }
         }
@@ -96,7 +106,7 @@ class NKScriptTypeInfo<T> {
     }
 
     NKScriptTypeInfoMemberInfo defaultConstructor() {
-        return _members.get("");
+        return _defaultConstructor;
     }
 
     boolean containsMethod(String item) {
@@ -135,7 +145,7 @@ class NKScriptTypeInfo<T> {
             _constructor = constructor;
 
             name = constructor.getName();
-            isVoid = true;
+            isVoid = false;
             isAsyncCallback = false;
 
             Class[] params = constructor.getParameterTypes();

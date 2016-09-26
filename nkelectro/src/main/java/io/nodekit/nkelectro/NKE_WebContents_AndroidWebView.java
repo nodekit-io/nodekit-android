@@ -42,8 +42,7 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
         HashMap<String,Object> options = new HashMap<String, Object>();
         options.put("js","lib_electro/webcontents.js");
 
-        NKE_WebContents principal1 = new NKE_WebContents_AndroidWebView();
-        context.loadPlugin(principal1, "io.nodekit.electro.WebContents", options);
+        context.loadPlugin(NKE_WebContents_AndroidWebView.class, "io.nodekit.electro.WebContents", options);
     }
 
     private class AndroidWebViewClient extends WebViewClient {
@@ -80,7 +79,7 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
         super();
     }
 
-    NKE_WebContents_AndroidWebView(NKE_BrowserWindow browserWindow) {
+    public NKE_WebContents_AndroidWebView(NKE_BrowserWindow browserWindow) {
         super(browserWindow);
     }
 

@@ -39,11 +39,7 @@ class NKE_BrowserWindow  implements NKScriptExport
         HashMap<String,Object> options = new HashMap<String, Object>();
         options.put("js","lib_electro/browserwindow.js");
 
-        NKE_BrowserWindow principal1 = new NKE_BrowserWindow();
-        NKScriptValue jsv1 = context.loadPlugin(principal1, "io.nodekit.electro.BrowserWindow", options);
-        principal1.initWithJSValue(jsv1);
-
-
+        context.loadPlugin(NKE_BrowserWindow.class, "io.nodekit.electro.BrowserWindow", options);
     }
 
     private void initWithJSValue(NKScriptValue jsv) {
@@ -83,7 +79,7 @@ class NKE_BrowserWindow  implements NKScriptExport
         try
         {
 
-      _webContents = new NKE_WebContents_AndroidWebView(this);
+            _webContents = new NKE_WebContents_AndroidWebView(this);
 
             // PARSE & STORE OPTIONS
             if (options.containsKey(NKE_BrowserWindow.Options.nkBrowserType))

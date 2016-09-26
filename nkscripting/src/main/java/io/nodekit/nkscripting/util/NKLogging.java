@@ -31,6 +31,7 @@ public class NKLogging {
 
     public static void log(Exception e)
     {
-        Log.v(TAG, e.toString());
+        Log.v(TAG, "ERROR " + e.toString());
+        e.printStackTrace();
     }
 }
