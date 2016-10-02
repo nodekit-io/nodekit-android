@@ -67,8 +67,11 @@ class NKScriptInvocation
 
     void callAsync(Method method, Object[] args, NKCallback callback)  {
         try {
+            if (callback != null)
+                method.invoke(target, args, callback);
+            else
+                method.invoke(target, args);
 
-            method.invoke(target, args, callback);
             //  method.invoke(target, unwrapArgs(method, args), callback);
         } catch (Exception e)
         {

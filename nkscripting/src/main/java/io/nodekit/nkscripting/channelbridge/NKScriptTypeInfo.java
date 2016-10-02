@@ -87,7 +87,7 @@ class NKScriptTypeInfo<T> {
 
                 {
                     NKScriptTypeInfoMemberInfo member = new NKScriptTypeInfoMemberInfo(m);
-                    _members.put(member.name, member);
+                    _members.put(member.key, member);
                 }
             }
         }
@@ -152,17 +152,9 @@ class NKScriptTypeInfo<T> {
             arity = params.length;
 
             StringBuilder sb = new StringBuilder();
-            Boolean started = false;
-            int argno = 0;
             for (Class param : params) {
-                if (!started)
-                {
-                    started = true;
-                } else
-                {
-                    sb.append(":");
-                }
-                sb.append("arg" + argno++ + param.getSimpleName().toLowerCase());
+                sb.append(":");
+                sb.append(param.getSimpleName().toLowerCase());
 
             }
             key = sb.toString();
@@ -183,18 +175,10 @@ class NKScriptTypeInfo<T> {
             isVoid = (_method.getReturnType().equals(Void.TYPE));
 
             StringBuilder sb = new StringBuilder();
-            int argno = 0;
-            Boolean started = false;
+            sb.append(_method.getName());
             for (Class param : params) {
-                if (!started)
-                {
-                    started = true;
-                } else
-                {
-                    sb.append(":");
-                }
-
-                sb.append("arg" + argno++ + param.getSimpleName().toLowerCase());
+                sb.append(":");
+                sb.append(param.getSimpleName().toLowerCase());
 
                 if (param == NKCallback.class)
                 {

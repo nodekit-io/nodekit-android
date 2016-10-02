@@ -31,6 +31,7 @@ import io.nodekit.nkscripting.util.NKLogging;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKScriptContextFactory;
 import io.nodekit.nkscripting.NKScriptExport;
+import io.nodekit.nkscripting.NKApplication;
 
 class NKE_BrowserWindow  implements NKScriptExport
 {
@@ -76,31 +77,35 @@ class NKE_BrowserWindow  implements NKScriptExport
          
         windowArray.put(_id, this);
 
-        try
-        {
+        try {
 
             _webContents = new NKE_WebContents_AndroidWebView(this);
 
             // PARSE & STORE OPTIONS
             if (options.containsKey(NKE_BrowserWindow.Options.nkBrowserType))
-                browserType = NKE_BrowserWindow.Type.valueOf((String)options.get(NKE_BrowserWindow.Options.nkBrowserType));
+                browserType = NKE_BrowserWindow.Type.valueOf((String) options.get(NKE_BrowserWindow.Options.nkBrowserType));
             else
                 browserType = NKE_BrowserWindow.Type.WebView;
 
-            switch(browserType)
-            {
+            final HashMap<String, Object> _options = options;
+
+            switch (browserType) {
                 case WebView:
                     NKLogging.log("+creating Native (Android WebView) Renderer");
-                    _webContents.createWebView(options);
+
+                    NKApplication.UIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _webContents.createWebView(_id, _options);
+                        }
+                    });
+
                     break;
                 default:
                     break;
 
             }
-
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             NKLogging.log(e);
         }
 

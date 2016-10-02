@@ -55,7 +55,7 @@ abstract class NKE_WebContents {
 
     }
 
-    abstract public void createWebView(HashMap<String, Object> options);
+    abstract public void createWebView(int id, HashMap<String, Object> options);
 
     void init_IPC()
     {

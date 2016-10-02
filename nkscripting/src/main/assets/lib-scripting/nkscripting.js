@@ -17,12 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-var exports;
-
-var NKScripting = (function NKScriptingRunOnce(exports) {
+(function NKScriptingRunOnce() {
     var global = this;
-    
+
    /*global.onerror = function(msg, url, line, col, err) {
           if (err)
             console.error(err.stack || err.toString())
@@ -35,8 +32,8 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
     this.FileList = (typeof FileList === 'undefined') ? {} : FileList;
     this.ImageData = (typeof ImageData === 'undefined') ? {} : ImageData;
     this.MessagePort = (typeof MessagePort === 'undefined') ? {} : MessagePort;
-                   var syncRef = 0;
-    var NKScripting = function NKScriptingObject(channelName) {
+    var syncRef = 0;
+    this.NKScripting = function (channelName) {
 
            if (channelName)
            {
@@ -77,8 +74,6 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
            this.events = {}
        }
 
-    exports = NKScripting;
-
     if (typeof window !== 'undefined')
     {
         if (window.webkit)
@@ -92,8 +87,6 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
         this.webkit.messageHandlers = NKScripting.messageHandlers;
      }
 
-
-
     NKScripting.messageHandlers = {};
 
     NKScripting.createNamespace = function(namespace, object) {
@@ -102,6 +95,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
                 return (p[c] = p[c] || {});
             if (p[c] instanceof NKScripting)
             {
+
                 p[c].dispose();
                 }
             return (p[c] = object || {});
@@ -110,7 +104,6 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
     }
 
     NKScripting.createPlugin = function(channelName, namespace, base) {
-        console.log(channelName + ":" + namespace + ":" + base);
         if (typeof(base) === "string") {
             // Plugin object is a constructor
             return NKScripting.createConstructor(channelName, namespace, base);
@@ -147,11 +140,12 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
 
     NKScripting.createConstructor = function(channelName, namespace, type) {
         var ctor = function() {
+            debugger;
             // Instance must can be accessed by native object in global context.
             var ctor = this.constructor;
         //    while (ctor[ctor.$lastInstID] != undefined)
-                ++ctor.$lastInstID;
-                      console.log("CTOR" + ctor.$lastInstID);
+            ++ctor.$lastInstID;
+            console.log("CTOR" + ctor.$lastInstID);
             Object.defineProperty(this, '$instanceID', {'configurable': true,'value': ctor.$lastInstID});
             Object.defineProperty(this, '$properties', {'configurable': true, 'value': {}});
             ctor[this.$instanceID] = this;
@@ -185,42 +179,14 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
               });
              this[instance.$instanceID] = instance;
                    instance.events = {}
-                   
+
              if (instance._init)  instance._init();
               return instance;
         }
-                   
+
         NKScripting.createNamespace(namespace, ctor);
         return proto;
     }
-                   
-                   NKScripting.defineProperty = function (obj, prop, value, writable) {
-                   var desc = {
-                   'configurable': false,
-                   'enumerable': true
-                   };
-                   if (writable) {
-                   // For writable property, any change of its value must be synchronized to native object.
-                   if (!obj.$properties)
-                   Object.defineProperty(obj, '$properties', {
-                                         'configurable': true,
-                                         'value': {}
-                                         });
-                   obj.$properties[prop] = value;
-                   desc.get = function () {
-                   return this.$properties[prop];
-                   }
-                   if (obj.constructor.$lastInstID)
-                   { desc.set = function (v) {
-                   NKScripting.invokeNative.call(this, prop, v);
-                   } } else
-                   desc.set = NKScripting.invokeNative.bind(obj, prop);
-                   } else {
-                   desc.value = value;
-                   desc.writable = false;
-                   }
-                   Object.defineProperty(obj, prop, desc);
-                   }
 
     NKScripting.invokeNative = function(name) {
         if (typeof(name) != 'string' && !(name instanceof String))
@@ -263,7 +229,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
                    { var result = this.$channel.postMessageSync({
                                                                '$opcode': name,
                                                                '$operand': operand,
-                                                               '$target': this.$instanceID
+                                                               '$target': this.$instanceID || 0
                                                                 });
                     return JSON.parse(result, JSON.dateParser);
                    }
@@ -271,7 +237,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
         this.$channel.postMessage({
             '$opcode': name,
             '$operand': operand,
-            '$target': this.$instanceID
+            '$target': this.$instanceID || 0
         });
     }
 
@@ -333,7 +299,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             delete this.$references;
             delete this.$lastRefID;
             delete this.events;
-                   
+
             if (this.$instanceID) {
                 // Dispose instance
             //    this.constructor.$lastInstID = this.$instanceID + 10;
@@ -344,7 +310,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             this.__proto__ = Object.getPrototypeOf(this.__proto__);
         }
     }
-                   
+
     /* Polyfill indexOf. */
     var indexOf;
 
@@ -368,7 +334,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             return idx;
         };
     };
-    
+
     NKScripting.prototype.on = function (event, listener) {
         if (typeof this.events[event] !== 'object') {
             this.events[event] = [];
@@ -391,7 +357,7 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
 
     NKScripting.prototype.emit = function (event) {
         var i, listeners, length, args = [].slice.call(arguments, 1);
-               
+
         if (typeof this.events[event] === 'object') {
             listeners = this.events[event].slice();
             length = listeners.length;
@@ -408,21 +374,12 @@ var NKScripting = (function NKScriptingRunOnce(exports) {
             listener.apply(this, arguments);
         });
     };
-                   
+
     /* Polyfill JSON Date Parsing */
-                   if (JSON && !JSON.dateParser) {
-                   var reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
-                   JSON.dateParser = function (key, value) {
-                   if (typeof value === 'string') {
-                   var a = reISO.exec(value);
-                   if (a) return new Date(value);
-                   }
-                   return value;
-                   };
-                   
-                   }
-                   
-                   
-    return exports;
-                   
-})(exports);
+    if(JSON&&!JSON.dateParser){var reISO=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;JSON.dateParser=function(a,b){if("string"==typeof b){var c=reISO.exec(b);if(c)return new Date(b)}return b}}
+
+    /* Polyfill Array fill */
+    Array.prototype.fill||(Array.prototype.fill=function(a){if(null==this)throw new TypeError("this is null or not defined");for(var b=Object(this),c=b.length>>>0,d=arguments[1],e=d>>0,f=e<0?Math.max(c+e,0):Math.min(e,c),g=arguments[2],h=void 0===g?c:g>>0,i=h<0?Math.max(c+h,0):Math.min(h,c);f<i;)b[f]=a,f++;return b});
+
+})();
+

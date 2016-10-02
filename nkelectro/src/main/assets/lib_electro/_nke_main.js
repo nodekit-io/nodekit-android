@@ -26,3 +26,6 @@ process.versions = {}
 process.waitFor = function(signal) {
     window.prompt("nk.Signal", signal);
 }
+
+var appjs = process.bootstrap.NativeModule.getSource('lib_electro/electro.js');
+process.bootstrap.NativeModule.loadPreCacheSource('electro',  appjs);

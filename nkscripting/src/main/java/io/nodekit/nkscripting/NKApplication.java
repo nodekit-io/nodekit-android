@@ -20,6 +20,8 @@ package io.nodekit.nkscripting;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 
 public class NKApplication {
@@ -36,6 +38,10 @@ public class NKApplication {
 
     public static void setAppContext(Activity activity) {
         mContext = activity;
+
+        NKApplication.UIHandler = new Handler(Looper.getMainLooper());
     }
+
+    public static Handler UIHandler;
 
 }

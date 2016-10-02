@@ -55,11 +55,11 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setVisibility(View.INVISIBLE);
         mWebContainer.addView(webView);
-        addJSContextWebView(webView, options, callback);
-    }
-
-    public static void addJSContextWebView(WebView webview, HashMap<String, Object> options, NKScriptContextDelegate callback) throws Exception {
         int id = NKScriptContextFactory.sequenceNumber++;
+        addJSContextWebView(id, webView, options, callback);
+     }
+
+    public static void addJSContextWebView(int id, WebView webview, HashMap<String, Object> options, NKScriptContextDelegate callback) throws Exception {
         NKEngineAndroidWebView.createContext(id, webview, options, callback);
     }
 
@@ -101,6 +101,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         for (NKScriptSource source : _sourceList) {
             try {
+                NKLogging.log("-->" + source.filename);
                 source.inject(this);
             } catch (Exception e) {
                 NKLogging.log(e);
@@ -125,24 +126,27 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
     @JavascriptInterface
     public String didReceiveScriptMessageSync(String channel, String message) throws Exception {
-
+        NKLogging.log(message);
         if (this._scriptMessageHandlers.containsKey(channel))
         {
             NKScriptMessage.Handler scriptHandler = _scriptMessageHandlers.get(channel);
-            NKScriptMessage body = (NKScriptMessage)NKSerialize.deserialize(message, NKScriptMessage.class);
-            Object result = scriptHandler.didReceiveScriptMessageSync(body);
+            Map<String, Object> body = NKSerialize.deserialize(message);
+            NKScriptMessage msg = new NKScriptMessage(channel, body);
+            Object result = scriptHandler.didReceiveScriptMessageSync(msg);
             return this.serialize(result);
-         }
-
-        return null;
+         } else
+        {
+            return null;
+        }
     }
 
     @JavascriptInterface
     public void didReceiveScriptMessage(String channel, String message) throws Exception {
+        NKLogging.log(message);
+
         if (this._scriptMessageHandlers.containsKey(channel))
         {
             NKScriptMessage.Handler scriptHandler = _scriptMessageHandlers.get(channel);
-            NKLogging.log(message);
             Map<String, Object> body = NKSerialize.deserialize(message);
             NKScriptMessage msg = new NKScriptMessage(channel, body);
             scriptHandler.didReceiveScriptMessage(msg);
@@ -167,6 +171,8 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
 
     private void prepareEnvironment() throws Exception {
+
+        NKLogging.log(_webview.toString());
 
         _webview.addJavascriptInterface(this, "NKScriptingBridge");
 
@@ -193,7 +199,8 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         callback.NKScriptEngineDidLoad(this);
 
-        _webview.loadDataWithBaseURL("", "<html><body>NodeKit Running</body></html>", "text/html", "UTF-8", "");
+       if (_webview.getVisibility() != View.VISIBLE)
+          _webview.loadDataWithBaseURL("", "<html><body>NodeKit Running</body></html>", "text/html", "UTF-8", "");
 
     }
 
@@ -222,8 +229,6 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
                     scriptValue = channel.bindPlugin(plugin, ns, options);
                 }
 
-                scriptValue = channel.bindPlugin(plugin, ns, options);
-
                 _injectedPlugins.add(scriptValue);
 
                 NKLogging.log("+NKScripting Plugin loaded with NKScripting channel at " + ns);
@@ -244,7 +249,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
                 String globalstubber = "NKScripting.createProjection(\"" + ns + "\", " + nsobj + ");\n function plugin" + _id + "(){\n" + js + "\n}\n" + "plugin" + _id + "();" + "\n";
 
-                this.injectJavaScript(new NKScriptSource(globalstubber, jspath));
+                this.injectJavaScript(new NKScriptSource(globalstubber, jspath, ns));
 
                 scriptValue = new NKScriptValue(ns, this);
                 ;
@@ -262,7 +267,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
     }
 
     public void evaluateJavaScript(String javaScriptString, NKCallback<String> callback) throws Exception {
-        this._webview.evaluateJavascript(javaScriptString, callback);
+       this._webview.evaluateJavascript(javaScriptString, callback);
     }
 
     public void injectJavaScript(NKScriptSource source) throws Exception {

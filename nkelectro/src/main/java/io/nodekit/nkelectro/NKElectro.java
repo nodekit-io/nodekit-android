@@ -15,10 +15,12 @@ public class NKElectro {
         NKScriptSource scriptsource = new NKScriptSource(script, "io.nodekit.electro/lib-electro/_nke_main.js", "io.nodekit.electro.main", null);
         context.injectJavaScript(scriptsource);
 
+        NKE_App.attachTo(context, options);
         NKE_BrowserWindow.attachTo(context, options);
         NKE_WebContents_AndroidWebView.attachTo(context, options);
         //  NKE_Dialog.attachTo(context, options);
         NKE_IpcMain.attachTo(context, options);
+        NKE_Protocol.attachTo(context, options);
     }
 
 

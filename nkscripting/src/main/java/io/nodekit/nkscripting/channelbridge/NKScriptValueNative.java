@@ -52,11 +52,11 @@ class NKScriptValueNative extends NKScriptValue {
         this._instanceid = instanceid;
         Class cls = channel.typeInfo.getType();
         NKScriptTypeInfoMemberInfo constructor = channel.typeInfo.defaultConstructor();
+        int arity = constructor.arity;
 
-        Object[] argsWrapped = wrapArgs(args);
+        Object[] argsWrapped = wrapArgs(args, arity);
         NKScriptValue promise = null;
 
-        int arity = constructor.arity;
 
         Object instance = NKScriptInvocation.construct(cls, constructor.getconstructor(), argsWrapped);
 
@@ -121,10 +121,13 @@ class NKScriptValueNative extends NKScriptValue {
         if (member != null)
         {
             Method mi = member.getmethod();
-            proxy.callAsync(mi, wrapArgs(args), callback);
+
+            int arity = member.arity;
+
+            proxy.callAsync(mi, wrapArgs(args, arity), callback);
         }
 
-        callback.onReceiveValue(null);
+        if (callback != null) callback.onReceiveValue(null);
     }
 
     Object invokeNativeMethodSync(String method, Object[] args)  {
@@ -138,14 +141,15 @@ class NKScriptValueNative extends NKScriptValue {
         if (member != null)
         {
             Method mi = member.getmethod();
-            return proxy.call(mi, wrapArgs(args));
+            int arity = member.arity;
+            return proxy.call(mi, wrapArgs(args, arity));
         }
 
         return null;
 
     }
 
-    private Object[] wrapArgs(Object[] args) {
+    private Object[] wrapArgs(Object[] args, int arity) {
 
         ArrayList<Object> result = new ArrayList<Object>();
 
@@ -153,7 +157,8 @@ class NKScriptValueNative extends NKScriptValue {
             result.add(wrapScriptObject(obj));
         }
 
-        result.add(this);
+        if (result.size() == (arity-1))
+            result.add(this);
 
         return result.toArray();
     }
@@ -199,7 +204,7 @@ class NKScriptValueNative extends NKScriptValue {
         if (member != null)
         {
             Method mi = member.getmethod();
-            proxy.callAsync(mi, wrapArgs(args), completionHandler);
+            proxy.callAsync(mi, wrapArgs(args, member.arity), completionHandler);
         }
         else
             super.invokeMethod(method, args, completionHandler);

@@ -18,9 +18,12 @@
 
 package io.nodekit.nkelectro;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebResourceRequest;
@@ -29,12 +32,14 @@ import android.widget.FrameLayout;
 
 import java.util.HashMap;
 import java.util.Map;
+import android.net.Uri;
 
 import io.nodekit.nkscripting.NKApplication;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKScriptValue;
 import io.nodekit.nkscripting.engines.androidwebview.NKEngineAndroidWebView;
 import io.nodekit.nkscripting.util.NKLogging;
+import io.nodekit.nkelectro.NKE_Protocol.ProtocolHandler;
 
 class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScriptContext.NKScriptContextDelegate {
 
@@ -43,6 +48,18 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
         options.put("js","lib_electro/webcontents.js");
 
         context.loadPlugin(NKE_WebContents_AndroidWebView.class, "io.nodekit.electro.WebContents", options);
+    }
+
+    private static HashMap<String, ProtocolHandler> registeredSchemes = new HashMap<>();
+
+    static void registerScheme(String scheme, ProtocolHandler callback)
+    {
+        registeredSchemes.put(scheme, callback);
+    }
+
+    static void unregisterScheme(String scheme)
+    {
+        registeredSchemes.remove(scheme);
     }
 
     private class AndroidWebViewClient extends WebViewClient {
@@ -69,11 +86,90 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
         {
             this._parent.onLoadResource(view, url);
         }
+
+        @Override
+        @TargetApi(21)
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            HashMap<String, Object> req  =  parseUri(request.getUrl());
+            if (req == null)
+                return super.shouldInterceptRequest(view, request);
+
+            req.put("method", request.getMethod());
+            req.put("headers", request.getRequestHeaders());
+
+            String scheme = (String)req.get("scheme");
+            ProtocolHandler callback = registeredSchemes.get(scheme);
+            WebResourceResponse connection =  callback.invoke(req);
+            if (connection != null) return connection;
+            return super.shouldInterceptRequest(view, request);
+        }
+
+        private HashMap<String, Object> parseUri(Uri uri) {
+            HashMap<String, Object> req  = new HashMap<>();
+
+            try {
+
+                String host = uri.getHost().toLowerCase();
+                String scheme = uri.getScheme().toLowerCase();
+
+                if (!registeredSchemes.containsKey(scheme) && registeredSchemes.containsKey(host))
+                {
+                    scheme = host;
+                } else if (!registeredSchemes.containsKey(scheme)) {
+                    return null;
+                }
+
+                req.put("host", host);
+                req.put("scheme", scheme);
+
+                String path = uri.getPath();
+                String query = uri.getQuery();
+
+                if (path.equals("")) { path = "/"; }
+
+
+                String pathWithQuery;
+
+                if ( query!= null && !query.equals("")) {
+                    pathWithQuery = path + "?" + query;
+                } else {
+                    pathWithQuery = path;
+                }
+
+                req.put("path", pathWithQuery);
+
+
+            } catch (Exception e) {
+                NKLogging.log(e);
+                return null;
+            }
+
+            return req;
+        }
+
+        @Override
+        public final WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+
+            Uri uri = Uri.parse(url);
+            HashMap<String, Object> req  =  parseUri(uri);
+            if (req == null)
+                return super.shouldInterceptRequest(view, url);
+
+            req.put("method", "GET");
+            req.put("headers", new HashMap<String, String>());
+
+            String scheme = (String)req.get("scheme");
+            ProtocolHandler callback = registeredSchemes.get(scheme);
+            WebResourceResponse connection =  callback.invoke(req);
+            if (connection != null) return connection;
+            return super.shouldInterceptRequest(view, url);
+        }
     }
 
     private WebView webView;
     private Boolean _isLoading;
     private HashMap<String, Object> options;
+
 
     private NKE_WebContents_AndroidWebView() {
         super();
@@ -84,23 +180,26 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
     }
 
     @SuppressLint("setJavaScriptEnabled")
-    public void createWebView(HashMap<String, Object> options)
+    @UiThread
+    public void createWebView(int id, HashMap<String, Object> options)
     {
 
+        this.options = options;
         FrameLayout _root = (FrameLayout) NKApplication.getRootView().findViewById(android.R.id.content);
         FrameLayout mWebContainer = (FrameLayout) _root.getChildAt(0);
         WebView webView = new WebView(NKApplication.getAppContext());
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.setVisibility(View.INVISIBLE);
+        webView.setVisibility(View.VISIBLE);
         mWebContainer.addView(webView);
+        this.webView = webView;
+        _browserWindow.webView = webView;
+
         try {
-            NKEngineAndroidWebView.addJSContextWebView(webView, options, this);
+            NKEngineAndroidWebView.addJSContextWebView(id, webView, options, this);
         } catch (Exception e) {
             NKLogging.log(e);
         }
 
-        this.webView = webView;
-        _browserWindow.webView = webView;
     }
 
     public void NKScriptEngineDidLoad(NKScriptContext context) {
@@ -114,23 +213,23 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
             }
         }
 
-    }
-
-    public void NKScriptEngineReady(NKScriptContext context)
-    {
         String url;
         if (options.containsKey(NKE_BrowserWindow.Options.kPreloadURL))
             url = (String)options.get(NKE_BrowserWindow.Options.kPreloadURL);
         else
             url = "about:blank";
-
         webView.setWebViewClient(new AndroidWebViewClient(this));
         webView.loadUrl(url);
+
+    }
+
+    public void NKScriptEngineReady(NKScriptContext context)
+    {
         this.init_IPC();
 
          NKLogging.log(String.format("+E%s Renderer Ready", _id));
 
-        _browserWindow.events.emit("NKE.DidFinishLoad", _id);
+        _browserWindow.events.emit("NKE.DidFinishLoad", Integer.toString(_id));
 
     }
 
@@ -146,7 +245,7 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
                                String url) {
         _isLoading = false;
 
-        _browserWindow.events.emit("NKE.DidFinishLoad", _id);
+        _browserWindow.events.emit("NKE.DidFinishLoad",  Integer.toString(_id));
 
     }
 
@@ -154,6 +253,7 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
         _isLoading = false;
         _browserWindow.events.emit("NKE.DidFailLoading", _id);
     }
+
 
     // Helper Methods
 

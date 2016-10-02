@@ -66,9 +66,9 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
         ((NKScriptMessage.Controller)context).addScriptMessageHandler(this, id);
 
         // Class, not instance, passed to bindPlugin -- to be used in Factory constructor/instance pattern in js
-        String name = pluginType.getName();
+        String name = pluginType.getSimpleName().toLowerCase();
 
-         typeInfo = new NKScriptTypeInfo<T>(pluginType);
+        typeInfo = new NKScriptTypeInfo<T>(pluginType);
 
 
         // Need to store the channel on the class itself so it can be found when native construct requests come in from other plugins
@@ -82,9 +82,9 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
 
         NKScriptExport.Proxy export = new NKScriptExport.Proxy(pluginType);
 
-        NKScriptSource script = new NKScriptSource(_generateStubs(export, name), ns + "/plugin/" + name + ".js");
+        NKScriptSource script = new NKScriptSource(_generateStubs(export, name, options), ns + "/plugin/" + name + ".js");
         context.injectJavaScript(script);
-        return _principal;
+         return _principal;
     }
 
 
@@ -104,7 +104,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
 
         // Instance of Princpal passed to bindPlugin -- to be used in singleton/static pattern in js
         Class<T> pluginType = (Class<T>)plugin.getClass();
-        String name = pluginType.getName();
+        String name = pluginType.getSimpleName().toLowerCase();
 
          typeInfo = new NKScriptTypeInfo<T>(plugin, pluginType);
 
@@ -116,7 +116,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
 
         NKScriptExport.Proxy export = new NKScriptExport.Proxy(pluginType);
 
-        NKScriptSource script = new NKScriptSource(_generateStubs(export, name), ns + "/plugin/" + name + ".js");
+        NKScriptSource script = new NKScriptSource(_generateStubs(export, name, options), ns + "/plugin/" + name + ".js");
         context.injectJavaScript(script);
         return _principal;
     }
@@ -192,6 +192,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
             Map<String, Object> body = (Map<String, Object>) message.body;
             if (body.containsKey("$opcode")) {
                 String opcode = (String) body.get("$opcode");
+
                 int target = Integer.parseInt(body.get("$target").toString());
                 if (_instances.indexOfKey(target) >= 0) {
                     NKScriptValueNative obj = _instances.get(target);
@@ -204,16 +205,22 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                             _instances.remove(target);
                         }
                     } else if (typeInfo.containsMethod(opcode)) {
+                        ArrayList<Object> al = (ArrayList<Object>)body.get("$operand");
+
                         // Invoke method
                         // TODO:  ASYNC RESULT
-                        obj.invokeNativeMethod(opcode, (Object[]) body.get("$operand"), null);
+                        obj.invokeNativeMethod(opcode, al.toArray(), null);
+
                     } else {
                         NKLogging.log(String.format("!Invalid member name: %s", opcode));
                     }
                 } else if (opcode.equals("+")) {
                     // Create instance
-                    Object[] args = (Object[]) body.get("$operand");
-                    String nsInstance = String.format(Locale.US, "%s[%d]", this.ns, target);
+                    ArrayList<Object> al = (ArrayList<Object>)body.get("$operand");
+                    Object[] args = al.toArray();
+
+                    // Create instance
+                      String nsInstance = String.format(Locale.US, "%s[%d]", this.ns, target);
                     _instances.put(target, new NKScriptValueNative(nsInstance, this, target, args, true));
                 } else {
                     // else Unknown opcode
@@ -273,8 +280,9 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                     }
                     else if (typeInfo.containsMethod(opcode))
                     {
+                        ArrayList<Object> al = (ArrayList<Object>)body.get("$operand");
                         // Invoke method
-                        result = obj.invokeNativeMethodSync(opcode, (Object[])body.get("$operand"));
+                        result = obj.invokeNativeMethodSync(opcode, al.toArray());
                     }
                     else {
                         NKLogging.log(String.format("!Invalid member name: %s", opcode));
@@ -283,8 +291,9 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                 }
                 else if (opcode.equals("+"))
                 {
+                    ArrayList<Object> al = (ArrayList<Object>)body.get("$operand");
                     // Create instance
-                    Object[] args = (Object[]) body.get("$operand");
+                    Object[] args = al.toArray();
                     String nsInstance = String.format(Locale.US, "%s[%d]", this.ns, target);
                     _instances.put(target, new NKScriptValueNative(nsInstance, this, target, args, true));
                     result = true;
@@ -319,7 +328,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
         return prebind ? String.format("%s;", stub) : "function(){return " + stub + ".apply(null, arguments);}";
     }
 
-    private String _generateStubs(NKScriptExport.Proxy export, String name)
+    private String _generateStubs(NKScriptExport.Proxy export, String name, HashMap<String, Object> options)
     {
         Boolean prebind = !this.isFactory;
         StringBuilder stubs = new StringBuilder();
@@ -356,13 +365,19 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
             basestub = export.rewriteGeneratedStub(String.format("'%s'", constructor.getNKScriptingjsType()), ".base");
         } else
         {
-            basestub = export.rewriteGeneratedStub("null", ".base");
+             basestub = export.rewriteGeneratedStub("null", ".base");
         }
 
         String localstub = export.rewriteGeneratedStub(stubs.toString(), ".local");
         String globalstubber = "(function(exports) {\n" + localstub + "})(NKScripting.createPlugin('" + id + "', '" + this.ns + "', " + basestub + "));\n";
 
-        NKLogging.log(globalstubber);
+        if (options.containsKey("js"))
+        {
+            String appjs = NKStorage.getResource((String)options.get("js"));
+
+            globalstubber =  "function loadplugin(){\n" + appjs + "\n}\n" + globalstubber + "\n" + "loadplugin();" + "\n";
+        }
+
         return export.rewriteGeneratedStub( globalstubber, ".global");
     }
 

@@ -30,9 +30,10 @@ console.log = function(msg) { NKScriptingBridge.log( msg );  }
 NKScripting.serialize = true;
 
 NKScripting.getMessageHandlers = function (name) {
+
     return {
-        'postMessage': function (message) { NKScriptingBridge.didReceiveScriptMessage(name, JSON.stringify(message)) },
-        'postMessageSync': function (message) { NKScriptingBridge.didReceiveScriptMessageSync(name, JSON.stringify(message)) }
+        'postMessage': function (message) {  NKScriptingBridge.didReceiveScriptMessage(name, JSON.stringify(message)); },
+        'postMessageSync': function (message) { return NKScriptingBridge.didReceiveScriptMessageSync(name, JSON.stringify(message)) }
     };
 }
 

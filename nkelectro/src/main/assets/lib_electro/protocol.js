@@ -26,13 +26,7 @@
 
 var protocol = io.nodekit.electro.protocol
 
-protocol._init = function() {
-    this.callbacks = {}
-    this.on('NKE.IPCReplytoRenderer', function(sender, channel, replyId, result) {
-            callbacks[replyId].call(self, result);
-            delete callbacks[replyId];
-            });
-}
+this.callbacks = {}
 
 protocol.registerStandardSchemes = function(schemes) { /* do nothing */}
 
@@ -40,27 +34,32 @@ protocol.registerServiceWorkerSchemes = function(schemes) {/* do nothing */}
 
 protocol.registerFileProtocol = function(scheme, handler, completion) {
     callbacks[scheme.toLowerCase()] = handler;
-    this.registerCustomProtocol(scheme, this.callbackFile, completion);
+    this.registerCustomProtocol(scheme, this.callbackFile);
+    if (completion) completion(null);
 }
 
 protocol.registerBufferProtocol = function(scheme, handler, completion) {
     callbacks[scheme.toLowerCase()] = handler;
-    this.registerCustomProtocol(scheme, this.callbackBuffer, completion);
+    this.registerCustomProtocol(scheme, this.callbackBuffer);
+    if (completion) completion(null);
 }
 
 protocol.registerStringProtocol = function(scheme, handler, completion) {
     callbacks[scheme.toLowerCase()] = handler;
-    this.registerCustomProtocol(scheme, this.callbackString, completion);
+    this.registerCustomProtocol(scheme, this.callbackString);
+     if (completion) completion(null);
 }
 
 protocol.registerHttpProtocol = function(scheme, handler, completion) {
     callbacks[scheme.toLowerCase()] = handler;
-    this.registerCustomProtocol(scheme, this.callbackHttp, completion);
+    this.registerCustomProtocol(scheme, this.callbackHttp);
+    if (completion) completion(null);
 }
 
 protocol.unregisterProtocol = function(scheme, completion) {
     delete callbacks[scheme.toLowerCase()];
-    this.unregisterCustomProtocol(scheme, completion);
+    this.unregisterCustomProtocol(scheme);
+    if (completion) completion(null);
 }
 
 protocol.callbackFile = function(request) {
@@ -154,6 +153,9 @@ protocol.interceptHttpProtocol = function(scheme, handler, completion) {
 }
 protocol.uninterceptProtocol = function(scheme, completion) {
    this.unregisterProtocol(scheme, handler, completion);
+}
+protocol.interceptInternalProtocol = function(scheme) {
+   this.registerInternalProtocol(scheme);
 }
 
 // Polyfill for atob and btoa

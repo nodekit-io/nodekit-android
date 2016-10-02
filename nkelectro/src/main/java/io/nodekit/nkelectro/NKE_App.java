@@ -59,7 +59,7 @@ final class NKE_App implements NKScriptExport
 
         windowCount = 0;
 
-        events.once("NK.AppReady", new NKEventHandler<String>() {
+        events.on("NK.AppReady", new NKEventHandler<String>() {
             protected void call(String event, String test) {
                 jsValue.invokeMethod("emit", new String[] { "ready" });
             }

@@ -46,7 +46,7 @@ public class NKScriptSource
             this.ns = null;
             this.cleanup = null;
         }
-        if (this.filename.equals(""))
+       if (this.filename.equals(""))
         {
             this.source = source;
         }
