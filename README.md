@@ -5,11 +5,11 @@ For application developers, the backend can be written in pure Node javascript c
 
 *{NK} NodeKit* enables applications developed for Node to developed once and then run without alteration for any of the above platforms as well as in the browser.
 
-This repository [nodekit-io/nodekit-darwin](https://github.com/nodekit-io/nodekit-darwin) contains those components that are specific to Apple platforms (including iOS, OSX, and tvOS). 
+This repository [nodekit-io/nodekit-android](https://github.com/nodekit-io/nodekit-android) contains those components that are specific to Google Android and Amazon Fire OS platforms (phones, tablets, and TV Sticks)
 
 See [nodekit-io/nodekit-windows](https://github.com/nodekit-io/nodekit-windows) for the corresponding repository for Windows platforms (including Windows 7+ Desktop, Windows 10 Desktop, Windows 10+ Mobile, Xbox, SurfaceHub and IoT device familes) 
 
-See [nodekit-io/nodekit-android](https://github.com/nodekit-io/nodekit-android) for the corresponding repository for Android platforms.
+See [nodekit-io/nodekit-darwin](https://github.com/nodekit-io/nodekit-darwin) for the corresponding repository for Apple iOS and macOS platforms.
 
 # {NK} NodeKit
 
@@ -62,7 +62,7 @@ Then just make sure any standard Node application is in the www/ directory.  Thi
 const app = require('electro').app;
 const BrowserWindow = require('electro').BrowserWindow
 app.on('ready', function() {
-  var p = new BrowserWindow({ 'preloadURL': 'http://nodekit.io });
+  var p = new BrowserWindow({ 'preloadURL': 'http://nodekit.io' });
 });
 ```
 
