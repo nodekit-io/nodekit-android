@@ -33,7 +33,7 @@ public class NKElectro {
 
         HashMap<String, Object> optionsDefault = new HashMap<String, Object>();
 
-        NKE_IpcRenderer.attachTo(context, optionsDefault);
+     //   NKE_IpcRenderer.attachTo(context, optionsDefault);
     }
 
 }

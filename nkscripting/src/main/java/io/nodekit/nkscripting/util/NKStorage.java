@@ -186,7 +186,7 @@ public class NKStorage implements NKScriptExport {
         try {
             return NKApplication.getAppContext().getAssets().open(getPath_(fileName));
         } catch (IOException e) {
-           // ignore
+            NKLogging.log(e);
         }
 
         for (String search : searchPaths) {
