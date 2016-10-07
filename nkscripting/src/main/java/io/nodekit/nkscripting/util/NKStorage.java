@@ -47,7 +47,8 @@ public class NKStorage implements NKScriptExport {
     static  {
         try {
             PackageManager pm = NKApplication.getAppContext().getPackageManager();
-            ApplicationInfo appInfo = pm.getApplicationInfo("app.package.name", 0);
+            String s = NKApplication.getAppContext().getPackageName();
+            ApplicationInfo appInfo = pm.getApplicationInfo(s, 0);
             String appFile = appInfo.sourceDir;
             installedTimeStamp = new File(appFile).lastModified();
         } catch (Exception e) {
@@ -91,7 +92,7 @@ public class NKStorage implements NKScriptExport {
     }
 
     // static members
-    private static ArrayList<String> searchPaths;
+    private static ArrayList<String> searchPaths = new ArrayList<>();
 
 
     // PUBLIC STATIC METHODS, ACCESSIBLE FROM NATIVE ONLY
@@ -243,6 +244,8 @@ public class NKStorage implements NKScriptExport {
                 if (joinedPath.exists())
                     return true;
         }
+
+        NKLogging.log("!Not found" + module);
 
         return false;
     }
