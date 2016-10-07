@@ -13,15 +13,24 @@ See [nodekit-io/nodekit-darwin](https://github.com/nodekit-io/nodekit-darwin) fo
 
 # {NK} NodeKit
 
-[![JitPack compatible](https://img.shields.io/badge/JitPack-compatible-4BC51D.svg?style=flat-square)](https://jitpack.io/com/github/nodekit-io/nodekit-android/v1.0.3/build.log)
+[![JitPack compatible](https://img.shields.io/badge/JitPack.io-compatible-4BC51D.svg?style=flat-square)](https://jitpack.io/com/github/nodekit-io/nodekit-android/v1.0.3/build.log)
 [![Join the chat at https://gitter.im/nodekit-io/nodekit](https://img.shields.io/badge/Chat-on_gitter-46BC99.svg?style=flat-square)](https://gitter.im/nodekit-io/nodekit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![{NK} Roadmap](https://img.shields.io/badge/OpenSource-roadmap-DE3B30.svg?style=flat-square)](http://roadmap.nodekit.io)
 [![@Contact](https://img.shields.io/badge/Contact-@nodekitio-4DA6FD.svg?style=flat-square)](https://twitter.com/nodekitio)
 
-## Sample Application (using Command Line Tool)
+## Installation
+
+Make sure you have Node.js installed (between v4 and v6).
+
+Optimal: nstall Node.js version 6.7 or later and npm 3.10 or later using nvm
 
 ``` bash
-npm install nodekit -g 
+npm install -g nodekit
+```
+
+## Create a Sample Application
+
+``` bash
 nodekit create myapp io.nodekit.myapp myapp
 cd myapp
 nodekit platform add android
