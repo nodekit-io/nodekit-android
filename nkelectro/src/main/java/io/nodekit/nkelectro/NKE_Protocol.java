@@ -122,7 +122,7 @@ final class NKE_Protocol implements NKScriptExport
 
        public WebResourceResponse invoke(Map<String, Object> req)  {
             String scheme = (String)req.get("scheme");
-            if (!registeredSchemes.containsKey(scheme)) { return null; }
+            if (!registeredSchemes.containsKey(scheme)) { NKLogging.log("Unkown scheme " + scheme); return null; }
 
             try {
 
@@ -143,7 +143,7 @@ final class NKE_Protocol implements NKScriptExport
 
          public WebResourceResponse invoke(Map<String, Object> req)  {
             String scheme = ((String)req.get("scheme"));
-            if (!scheme.equals("internal")) { return null; }
+            if (!scheme.equals("internal")) { NKLogging.log("Unkown internal " + scheme);  return null; }
 
             try {
 
