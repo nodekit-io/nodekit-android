@@ -85,7 +85,9 @@ It is the foundation of {NK} NodeKit and can be used without {NK} Electro or {NK
 
 The {NK} NodeKit repository contains an Android Studio project with all the above components (zero dependencies) that compiles to an iOS 8 + and OS X 10.9 + dynamic framework.  Versions for Windows 10 and iOS/macOS are also available.
 
-The single framework file (containing binary code and embedded resources like the core Node.js javascript code) can just be included in any iOS or OS X application.    See the sample app for an example.   You can thus compile and create your own projects;  no app store consumer really needs to know how you built it unless you want to tell them or modify the {NK} NodeKit source. 
+The library is distributed as 3 AAR components using JitPack.
+
+The aar files (containing binary code and embedded resources like the core Node.js javascript code) can just be included in any Java Android application.    See the sample app for an example.   You can thus compile and create your own projects;  no app store consumer really needs to know how you built it unless you want to tell them or modify the {NK} NodeKit source. 
 
 ## Is it really Node ?
 
@@ -109,16 +111,16 @@ Just use Chrome Web Inspector to set breakpoints, inspect variables, etc.
 
 ## Supports
 
-iOS 8+, 9+, 10+
-macOS 10.9, 10.10, 10.11, 10.12
-Android 4.4+, 5.0+, 6.0+
-Windows 10 Universal Platform (October 2015 update or more recent)
-Node.js ~0.12.x
+* iOS 8+, 9+, 10+
+* macOS 10.9, 10.10, 10.11, 10.12
+* Android 4.4+, 5.0+, 6.0+
+* Windows 10 Universal Platform (October 2015 update or more recent)
+* Node.js ~0.12.x
 
 ## Still In development
 
-Windows 7, Vista, 8, 8.1 for desktop applications
-Node.js 4.x/5.x updates (we run a very stable 0.12.x for broadest package compatibility, and are currently testing the 4.x LTS version in a development branch).
+* Windows 7, Vista, 8, 8.1 for desktop applications
+* Node.js 4.x/5.x updates (we run a very stable 0.12.x for broadest package compatibility, and are currently testing the 4.x LTS version in a development branch).
 
 ## License
 
