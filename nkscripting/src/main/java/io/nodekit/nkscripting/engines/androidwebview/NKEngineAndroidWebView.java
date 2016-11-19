@@ -20,10 +20,10 @@ package io.nodekit.nkscripting.engines.androidwebview;
 
 import android.annotation.SuppressLint;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,8 +49,8 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
     public static void createContextWebView(HashMap<String, Object> options, NKScriptContextDelegate callback) throws Exception {
         WebView.setWebContentsDebuggingEnabled(true);
 
-        FrameLayout _root = (FrameLayout) NKApplication.getRootView().findViewById(android.R.id.content);
-        FrameLayout mWebContainer = (FrameLayout) _root.getChildAt(0);
+        ViewGroup _root = (ViewGroup) NKApplication.getRootView().findViewById(android.R.id.content);
+        ViewGroup mWebContainer = (ViewGroup) _root.getChildAt(0);
         WebView webView = new WebView(NKApplication.getAppContext());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setVisibility(View.INVISIBLE);
