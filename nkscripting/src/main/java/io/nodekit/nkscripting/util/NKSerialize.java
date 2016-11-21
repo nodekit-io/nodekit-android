@@ -217,21 +217,22 @@ public class NKSerialize {
                 StringBuilder sb = new StringBuilder();
                 Boolean started = false;
                 for (String key : map.keySet()) {
-                    if (!started) {
-                        sb.append("{");
-                        started = true;
-                    } else {
-                        sb.append(",");
-                    }
-                    sb.append("\"").append(NKSerialize.serialize(key)).append("\": ").append(NKSerialize.serialize(map.get(key)));
+                    if (map.get(key) != null) {
+                        if (!started) {
+                            sb.append("{");
+                            started = true;
+                        } else {
+                            sb.append(",");
+                        }
 
+                        sb.append(NKSerialize.serialize(key)).append(": ").append(NKSerialize.serialize(map.get(key)));
+                    }
                 }
                 if (started) {
                     sb.append("}");
                 }
                 return sb.toString();
             }
-
         }
         catch (Exception e)
         {
