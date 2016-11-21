@@ -16,14 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-console.log("+NKStorage starting");
+
 var NativeStorage = io.nodekit.scripting.storage;
 
 this.global = this;
-    
+
 if (!process)
 {
-    console.log("This scripting engine is missing the process global variable")
     throw new Error("This scripting engine is missing the process global variable")
 }
 
@@ -49,9 +48,9 @@ process.bootstrap = function(id) {
 };
 
 var BootstrapModule = function BootstrapModule(id) {
-   
+
     var file = id.substring(id.lastIndexOf('/')+1);
- 
+
     if (file.indexOf('.') == -1)
     {
         this.__ext = 'js'
@@ -61,9 +60,9 @@ var BootstrapModule = function BootstrapModule(id) {
         this.__ext = file.substring(file.lastIndexOf('.') + 1);
         this.__filename = id;
     }
-        
+
     this.__dirname = id.substring(0, id.lastIndexOf('/'));
-    
+
     this.id = id;
     this.exports = {};
     this.loaded = false;
@@ -73,55 +72,66 @@ var BootstrapModule = function BootstrapModule(id) {
 process.bootstrap.NativeModule = BootstrapModule
 
 BootstrapModule.getSource = function(id) {
-    
+
     if (id.indexOf("/") > -1)
     {
         var source = atob(NativeStorage.getSourceSync(id))
         var append = "\r\n //# sourceURL=" + id + "\r\n";
         return source + append;
     }
-    
+
     if (BootstrapModule.preCacheSourceExists(id)) {
         return BootstrapModule.getPreCacheSource(id);
     }
-    
+
     var source = atob(NativeStorage.getSourceSync(id))
     var append = "\r\n //# sourceURL=" + id + "\r\n";
     return source + append;
-    
+
 }
 
 BootstrapModule.loadSource = function(id) {
-    
+
     return atob(NativeStorage.getSourceSync(id))
-    
+
 }
 
 BootstrapModule._cache = {};
+
+BootstrapModule._symlink = {};
+
+BootstrapModule.ln = function(source, dest) {
+    BootstrapModule._symlink[source] = dest;
+}
 
 BootstrapModule.prototype.require = function(id)
 {
     if (id == 'native_module') {
         return BootstrapModule;
     }
-    
-    if (id[0] == ".")
+
+    if (BootstrapModule._symlink[id])
+    {
+        id = BootstrapModule._symlink[id];
+    }
+    else if (id[0] == ".")
     {
         id = _absolutePath(this.__dirname + '/', id);
     }
-    
+
     var cached = BootstrapModule.getCached(id);
     if (cached) {
         return cached.exports;
     }
+
     process.moduleLoadList.push('BootstrapModule ' + id);
-    
+
     var bootstrapModule = new BootstrapModule(id);
-    
+
     bootstrapModule.cache();
-    
+
     bootstrapModule.load();
-    
+
     return bootstrapModule.exports;
 };
 
@@ -131,23 +141,23 @@ BootstrapModule.error = function(e, source)
 {
     console.log("ERROR OCCURED via " + source);
     console.log("EXCEPTION: " + e);
-    
+
     console.log(JSON.stringify(e));
     var message = "";
     var sourceFile = "unknown";
-    
+
     if (e.sourceURL)
     {
         sourceFile = e.sourceURL.replace("file://","");
     }
-    
+
     message += "<head></head>";
     message += "<body>";
     message += "<h1>Exception</h1>";
     message += "<h2>" + e + "</h2>";
     message += "<p><i>" + e["message"] +"</i> in file " + sourceFile + ": " + e.line;
-    
-    
+
+
     if (e.sourceURL)
     {
         source = global.process.sources[sourceFile];
@@ -159,7 +169,7 @@ BootstrapModule.error = function(e, source)
             message += "</ol></pre>";
         }
     }
-    
+
     if (e.stack)
     {
         message += "<h3>Call Stack</h3>";
@@ -167,7 +177,7 @@ BootstrapModule.error = function(e, source)
         message += "<li>" + e.stack.split("\n").join("</li><li>").split("file://").join("") + "</li>";
         message += "</ul></pre>";
     }
-    
+
     message += "</body>";
     console.loadString(message, "Debug");
     console.log("EXCEPTION: " + e);
@@ -186,17 +196,33 @@ BootstrapModule.getCached = function(id) {
     return BootstrapModule._cache[id];
 };
 
+
+BootstrapModule.loadFromSource = function(id, source) {
+
+    var module = new BootstrapModule(id);
+
+    var source = BootstrapModule.wrap(source);
+
+    var fn = BootstrapModule.runInThisContext(source, { filename: module.__filename , displayErrors: true});
+
+    fn(module.exports, module.require.bind(module), module, module.__filename, module.__dirname);
+
+    module.loaded = true;
+
+    return module.exports;
+}
+
 BootstrapModule.runInThisContext = function(code, options) {
     options = options || {};
-    
+
     var filename = options.filename || '<eval>';
     var displayErrors = options.displayErrors || false;
-    
+
     try {
         return process.evalSync(code, filename);
     } catch (e) {
         console.log(e.message + " - " + filename + " - " + e.stack);
-        
+
     }
 }
 
@@ -214,14 +240,14 @@ BootstrapModule.prototype.cache = function() {
 };
 
 BootstrapModule.prototype.load = function() {
-    
+
     if (this.__ext == 'js')
     {
         this.compile()
     }
     else if (this.__ext == 'json')
     {
-        
+
         var source = BootstrapModule.loadSource(this.id);
         try {
             this.exports = JSON.parse(source);
@@ -230,14 +256,16 @@ BootstrapModule.prototype.load = function() {
             throw err;
         }
     }
-    
+
     this.loaded = true;
-    
+
 };
+
+
 
 BootstrapModule.prototype.compile = function() {
     var source = BootstrapModule.getSource(this.id);
-    
+
     source = BootstrapModule.wrap(source);
     var fn = BootstrapModule.runInThisContext(source, { filename: this.__filename , displayErrors: true});
     fn(this.exports, this.require.bind(this), this, this.__filename, this.__dirname);
@@ -286,5 +314,3 @@ BootstrapModule.getPreCacheSource = function(id) {
 !function(){function t(t){this.message=t}var r="undefined"!=typeof exports?exports:this,e="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";t.prototype=new Error,t.prototype.name="InvalidCharacterError",r.btoa||(r.btoa=function(r){for(var o,n,a=String(r),i=0,c=e,d="";a.charAt(0|i)||(c="=",i%1);d+=c.charAt(63&o>>8-i%1*8)){if(n=a.charCodeAt(i+=.75),n>255)throw new t("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");o=o<<8|n}return d}),r.atob||(r.atob=function(r){var o=String(r).replace(/=+$/,"");if(o.length%4==1)throw new t("'atob' failed: The string to be decoded is not correctly encoded.");for(var n,a,i=0,c=0,d="";a=o.charAt(c++);~a&&(n=i%4?64*n+a:a,i++%4)?d+=String.fromCharCode(255&n>>(-2*i&6)):0)a=e.indexOf(a);return d})}();
 
 // See NKStorage.swift or NKStorage.cs or NKStorage.java
-
-console.log("+NKStorage initialized");
