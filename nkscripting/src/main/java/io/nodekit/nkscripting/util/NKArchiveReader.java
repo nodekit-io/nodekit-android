@@ -161,13 +161,17 @@ class NKArchiveReader {
 
             ZipInputStream zip = new ZipInputStream(stream);
             ZipEntry ze;
-            int depth = pathSegments(foldername) + 1;
+            if (foldername.length() > 0 && foldername.charAt(foldername.length()-1)=='/') {
+                foldername = foldername.substring(0, foldername.length()-1);
+            }
+
+            int depth = pathSegments(foldername) + 2;
 
             while ((ze = zip.getNextEntry()) != null) {
                 String item = ze.getName();
 
                 if (item.startsWith(foldername) && (pathSegments(item) == depth)){
-                    result.add(item);
+                    result.add(item.substring(foldername.length() + 1, item.length() - foldername.length() -2 ));
                 }
             }
             zip.close();
@@ -176,6 +180,8 @@ class NKArchiveReader {
         }
         return result;
     }
+
+
 
 /*
     private func getDirectory_(filename: String) -> NKAR_CentralDirectory? {
