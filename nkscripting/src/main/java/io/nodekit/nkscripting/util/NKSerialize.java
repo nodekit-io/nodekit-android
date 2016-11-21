@@ -191,6 +191,8 @@ public class NKSerialize {
                 }
                 if (started) {
                     sb.append("]");
+                } else {
+                    sb.append("[]");
                 }
                 return sb.toString();
 
@@ -210,6 +212,8 @@ public class NKSerialize {
                 }
                 if (started) {
                     sb.append("]");
+                } else {
+                    sb.append("[]");
                 }
                 return sb.toString();
             } else if (obj instanceof Map<?, ?>) {
@@ -229,7 +233,9 @@ public class NKSerialize {
                     }
                 }
                 if (started) {
-                    sb.append("}");
+                    sb.append("]");
+                } else {
+                    sb.append("{}");
                 }
                 return sb.toString();
             }

@@ -177,6 +177,30 @@ class NKArchiveReader {
         return result;
     }
 
+/*
+    private func getDirectory_(filename: String) -> NKAR_CentralDirectory? {
+
+        let cdir = _cdirs[filename]
+
+        if (cdir != nil) { return cdir }
+
+        if !filename.hasPrefix("*") { return nil }
+
+        let filename = (filename as NSString).substringFromIndex(1)
+
+        let depth = (filename as NSString).pathComponents.count
+
+        guard let item = self.files.filter({(item: String) -> Bool in
+        return item.lowercaseString.hasSuffix(filename.lowercaseString) &&
+                ((item as NSString).pathComponents.count == depth)
+
+        }).first else { return nil }
+
+        return self._cdirs[item]
+
+    }
+    */
+
     private Map<String, Object> stat(String archive, String filename, ZipEntry ze) {
         HashMap<String, Object> storageItem  = new HashMap<>();
         storageItem.put("birthtime", ze.getTime());
@@ -189,7 +213,7 @@ class NKArchiveReader {
 
 
     private static int pathSegments(String file) {
-        return file.length() - file.replace(".", "").length();
+        return file.length() - file.replace("/", "").length();
     }
 
 }
