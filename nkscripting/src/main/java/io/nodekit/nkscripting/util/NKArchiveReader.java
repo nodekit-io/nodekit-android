@@ -171,7 +171,7 @@ class NKArchiveReader {
                 String item = ze.getName();
 
                 if (item.startsWith(foldername) && (pathSegments(item) == depth && item.charAt(item.length()-1)=='/')){
-                    result.add(item.substring(foldername.length() + 1, item.length() - foldername.length() -2 ));
+                    result.add(item.substring(foldername.length() + 1, item.length()-1));
                 }
             }
             zip.close();
@@ -180,32 +180,6 @@ class NKArchiveReader {
         }
         return result;
     }
-
-
-
-/*
-    private func getDirectory_(filename: String) -> NKAR_CentralDirectory? {
-
-        let cdir = _cdirs[filename]
-
-        if (cdir != nil) { return cdir }
-
-        if !filename.hasPrefix("*") { return nil }
-
-        let filename = (filename as NSString).substringFromIndex(1)
-
-        let depth = (filename as NSString).pathComponents.count
-
-        guard let item = self.files.filter({(item: String) -> Bool in
-        return item.lowercaseString.hasSuffix(filename.lowercaseString) &&
-                ((item as NSString).pathComponents.count == depth)
-
-        }).first else { return nil }
-
-        return self._cdirs[item]
-
-    }
-    */
 
     private Map<String, Object> stat(String archive, String filename, ZipEntry ze) {
         HashMap<String, Object> storageItem  = new HashMap<>();
