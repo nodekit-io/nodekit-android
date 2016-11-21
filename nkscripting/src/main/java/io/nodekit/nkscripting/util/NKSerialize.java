@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -173,6 +174,26 @@ public class NKSerialize {
 
                 formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
                 return "\"" + formatter.format((Date) obj) + "\"";
+            } else if (type.isArray()) {
+                StringBuilder sb = new StringBuilder();
+                Boolean started = false;
+
+                final int arrayLength = Array.getLength(obj);
+                started = Boolean.valueOf(false);
+                for (int i = 0; i < arrayLength; i++) {
+                    if (!started) {
+                        sb.append("[");
+                        started = true;
+                    } else {
+                        sb.append(",");
+                    }
+                    sb.append(NKSerialize.serialize(Array.get(obj, i)));
+                }
+                if (started) {
+                    sb.append("]");
+                }
+                return sb.toString();
+
             } else if (obj instanceof Collection<?>) {
                 List<?> list = (List<?>) obj;
                 StringBuilder sb = new StringBuilder();
@@ -216,6 +237,8 @@ public class NKSerialize {
         {
             NKLogging.log(e);
         }
+
+        NKLogging.log("WARNING:  COULD NOT SERIALIZE " + obj.toString());
 
         return obj.toString();
 
