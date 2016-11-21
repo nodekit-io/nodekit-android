@@ -73,6 +73,16 @@ public class NKStorage implements NKScriptExport {
 
     @JavascriptInterface
     public String getSourceSync(String module) {
+
+        String extension = "";
+
+        int i = module.lastIndexOf('.');
+        int p = module.lastIndexOf('/');
+
+        if (i == -1 || i < p) {
+            module += ".js";
+        }
+
         return NKStorage.getResourceBase64(module);
     }
 
@@ -281,8 +291,10 @@ public class NKStorage implements NKScriptExport {
 
         byte [] bytes = getDataNKAR_(module);
 
-       return Base64.encodeToString(bytes, 0, bytes.length, Base64.NO_WRAP | Base64.NO_PADDING);
-
+        if (bytes != null) {
+            return Base64.encodeToString(bytes, 0, bytes.length, Base64.NO_WRAP | Base64.NO_PADDING);
+        } else
+            return null;
     }
 
     private static Map<String, Object> stat(String module) {
