@@ -170,7 +170,7 @@ class NKArchiveReader {
             while ((ze = zip.getNextEntry()) != null) {
                 String item = ze.getName();
 
-                if (item.startsWith(foldername) && (pathSegments(item) == depth)){
+                if (item.startsWith(foldername) && (pathSegments(item) == depth && item.charAt(item.length()-1)=='/')){
                     result.add(item.substring(foldername.length() + 1, item.length() - foldername.length() -2 ));
                 }
             }
