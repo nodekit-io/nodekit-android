@@ -233,7 +233,7 @@ public class NKSerialize {
                     }
                 }
                 if (started) {
-                    sb.append("]");
+                    sb.append("}");
                 } else {
                     sb.append("{}");
                 }
