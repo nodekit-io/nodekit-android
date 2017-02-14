@@ -173,9 +173,9 @@ class NKScriptValueNative extends NKScriptValue {
         {
             Map<String, Object> dict = (Map<String, Object>) obj;
 
-            if (dict.containsKey("$sig") && (Integer.getInteger((String)dict.get("$sig")) == 0x5857574F))
+            if (dict.containsKey("$sig") && ((Integer)dict.get("$sig")) == 0x5857574F)
             {
-                int num = Integer.getInteger((String)dict.get("$ref"));
+                int num = (Integer) dict.get("$ref");
                 return new NKScriptValue(num, this.context, this);
             }
 
