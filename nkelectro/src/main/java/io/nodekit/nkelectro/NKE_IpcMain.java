@@ -34,7 +34,7 @@ final class NKE_IpcMain
 
         HashMap<String,Object> options = new HashMap<String, Object>();
 
-        options.put("js","lib_electro/ipcmain.js");
+        options.put("js","lib_electro/ipc-main.js");
 
         NKE_IpcMain ipc = new NKE_IpcMain();
 

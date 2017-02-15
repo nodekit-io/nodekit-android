@@ -35,7 +35,7 @@ final class NKE_IpcRenderer
 
         HashMap<String,Object> options = new HashMap<String, Object>();
 
-        options.put("js","lib_electro/ipcrenderer.js");
+        options.put("js","lib_electro/ipc-renderer.js");
 
         NKE_IpcRenderer principal = new NKE_IpcRenderer(context.id());
 
