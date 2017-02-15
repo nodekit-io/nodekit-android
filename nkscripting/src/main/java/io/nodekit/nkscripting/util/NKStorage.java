@@ -147,7 +147,7 @@ public class NKStorage implements NKScriptExport {
 
         int i;
         try {
-            InputStream stream = getStream(fileName);
+            InputStream stream = getStreamRaw(fileName);
             if (stream == null)
                 return null;
 
@@ -193,6 +193,14 @@ public class NKStorage implements NKScriptExport {
 
     public static InputStream getStream(String fileName) {
 
+        if (isNKAR_(fileName)) return getStreamNKAR_(fileName);
+
+        return getStreamRaw(fileName);
+
+    }
+
+    public static InputStream getStreamRaw(String fileName) {
+
         try {
             return NKApplication.getAppContext().getAssets().open(getPath_(fileName));
         } catch (IOException e) {
@@ -218,23 +226,29 @@ public class NKStorage implements NKScriptExport {
 
     public static void copyStream(final InputStream inStream, final OutputStream outStream, final boolean closeOutput)
             throws IOException {
-        final int bufferSize = 16384;
-        final byte[] buffer = new byte[bufferSize];
-        int len = 0;
 
-        try {
-            while ((len = inStream.read(buffer)) != -1) {
-                outStream.write(buffer, 0, len);
+        new Thread(new Runnable() {
+            public void run() {
+                final int bufferSize = 16384;
+                final byte[] buffer = new byte[bufferSize];
+                int len = 0;
+
+                try {
+                    while ((len = inStream.read(buffer)) != -1) {
+                        outStream.write(buffer, 0, len);
+                    }
+                } catch (Exception e) {
+                    NKLogging.log(e);
+                } finally {
+                    try {
+                        if (outStream != null && closeOutput)
+                            outStream.close();
+                    } catch (IOException e) {
+                        NKLogging.log(e);
+                    }
+                }
             }
-        }
-        finally{
-            try {
-                if (outStream != null && closeOutput)
-                    outStream.close();
-            } catch (IOException e) {
-                NKLogging.log(e);
-            }
-        }
+        }).start();
     }
 
     public static boolean exists(String module)  {
@@ -402,6 +416,15 @@ public class NKStorage implements NKScriptExport {
         String fileentry  = moduleArr[1];
 
         return nkArchiveReader.dataForFile(archive, fileentry);
+    }
+
+    private static InputStream getStreamNKAR_(String module) {
+
+        String[] moduleArr = module.split(".nkar/", 2);
+        String archive = moduleArr[0] + ".nkar";
+        String fileentry  = moduleArr[1];
+
+        return nkArchiveReader.streamForFile(archive, fileentry);
     }
 
 }

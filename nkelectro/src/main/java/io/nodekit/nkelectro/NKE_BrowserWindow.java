@@ -41,6 +41,7 @@ class NKE_BrowserWindow  implements NKScriptExport
         options.put("js","lib_electro/browserwindow.js");
 
         context.loadPlugin(NKE_BrowserWindow.class, "io.nodekit.electro.BrowserWindow", options);
+
     }
 
     private void initWithJSValue(NKScriptValue jsv) {
@@ -109,11 +110,13 @@ class NKE_BrowserWindow  implements NKScriptExport
             NKLogging.log(e);
         }
 
-        events.on("NKE.DidFinishLoad", new NKEventHandler<String>() {
-            protected void call(String event, String test) {
-                jsValue.invokeMethod("emit", new String[] { "did-finish-load" });
-            }
-        });
+        if (jsValue != null) {
+            events.on("NKE.DidFinishLoad", new NKEventHandler<String>() {
+                protected void call(String event, String test) {
+                    jsValue.invokeMethod("emit", new String[]{"did-finish-load"});
+                }
+            });
+        }
 
     }
 

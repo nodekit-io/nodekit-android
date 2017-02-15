@@ -7,18 +7,12 @@
     android:layout_gravity="center"
     android:clickable="true"
     android:enabled="true"
-    tools:context="io.nodekit.nodekitandroid.MainActivity">
+    tools:context="io.nodekit.nkelectro.NK_ElectroHost_Activity">
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:layout_weight="1">
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Start"
-                    android:id="@+id/button" />
             </LinearLayout>
 </FrameLayout>

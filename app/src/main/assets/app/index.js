@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+// THIS FILE IS ONLY USED IF NO preLoadURL is set in MainActivity initializer
+
 const nodekit = require('electro').app,
       BrowserWindow = require('electro').BrowserWindow,
       protocol = require('electro').protocol;
 
 console.log("STARTING SAMPLE ELECTRO APPLICATION");
 
-protocol.interceptInternalProtocol("internal");
+protocol.interceptInternalProtocol("app");
 
 nodekit.on("ready", function() {
 
-           var p = new BrowserWindow({ 'preloadURL': 'internal://localhost/app/index.html',
+           var p = new BrowserWindow({ 'preloadURL': 'app://localhost/index.html',
                                      'nk.allowCustomProtocol': true,
                                      'nk.taskBarPopup': true,
                                      'nk.taskBarIcon': 'MenuIcon',

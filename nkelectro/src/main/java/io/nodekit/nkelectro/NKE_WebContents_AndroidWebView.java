@@ -205,13 +205,16 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
     public void NKScriptEngineDidLoad(NKScriptContext context) {
         _browserWindow.context = context;
 
-        if (!options.containsKey("nke.InstallElectro") || (Boolean) options.get("nke.InstallElectro")) {
+        if (!options.containsKey("nk.InstallElectro") || (Boolean) options.get("nk.InstallElectro")) {
             try {
                 NKElectro.addToRendererContext(_browserWindow.context, options);
             } catch (Exception e) {
                 NKLogging.log(e);
             }
         }
+
+        if (options.containsKey("nk.ScriptContextDelegate"))
+            ((NKScriptContext.NKScriptContextDelegate) options.get("nk.ScriptContextDelegate")).NKScriptEngineDidLoad(context);
 
         String url;
         if (options.containsKey(NKE_BrowserWindow.Options.kPreloadURL))
@@ -227,9 +230,12 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
     {
         this.init_IPC();
 
-         NKLogging.log(String.format("+E%s Renderer Ready", _id));
+         NKLogging.log(String.format("+E%s WebView Ready", _id));
 
         _browserWindow.events.emit("NKE.DidFinishLoad", Integer.toString(_id));
+
+        if (options.containsKey("nk.ScriptContextDelegate"))
+            ((NKScriptContext.NKScriptContextDelegate) options.get("nk.ScriptContextDelegate")).NKScriptEngineReady(context);
 
     }
 

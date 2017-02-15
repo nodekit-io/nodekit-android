@@ -22,6 +22,8 @@ import android.webkit.JavascriptInterface;
 
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -95,6 +97,53 @@ class NKArchiveReader {
             NKLogging.log(e);
         }
         return result;
+    }
+
+    InputStream streamForFile(final String archive, final String filename) {
+        final PipedInputStream pipedInputStream=new PipedInputStream();
+        final PipedOutputStream pipedOutputStream=new PipedOutputStream();
+
+		/*Connect pipe*/
+        try {
+        pipedInputStream.connect(pipedOutputStream);
+        } catch (Exception e) {
+            NKLogging.log(e);
+        }
+
+            new Thread(new Runnable() {
+                public void run () {
+                    try {
+                        InputStream stream = NKStorage.getStream(archive);
+
+                        if (stream == null) return ;
+
+                        ZipInputStream zip = new ZipInputStream(stream);
+
+                        ZipEntry ze;
+
+                        while ((ze = zip.getNextEntry()) != null) {
+
+                            if (!ze.isDirectory()) {
+                                if (ze.getName().equals(filename)) {
+                                    byte[] buffer = new byte[1024];
+                                    int count;
+                                    while ((count = zip.read(buffer)) != -1) {
+                                        pipedOutputStream.write(buffer, 0, count);
+                                    }
+                                    break;
+
+                                }
+                            }
+                        }
+                        zip.close();
+                        pipedOutputStream.close();
+                     } catch (Exception e) {
+                        NKLogging.log(e);
+                    }
+                }
+                }).start();
+
+        return pipedInputStream;
     }
 
     boolean exists(String archive, String filename) {

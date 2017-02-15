@@ -21,6 +21,7 @@ public class NKElectro {
         //  NKE_Dialog.attachTo(context, options);
         NKE_IpcMain.attachTo(context, options);
         NKE_Protocol.attachTo(context, options);
+
     }
 
 
@@ -32,7 +33,7 @@ public class NKElectro {
         context.injectJavaScript(scriptsource);
 
         HashMap<String, Object> optionsDefault = new HashMap<String, Object>();
-
+        NKE_Protocol.attachTo(context, optionsDefault);
      //   NKE_IpcRenderer.attachTo(context, optionsDefault);
     }
 

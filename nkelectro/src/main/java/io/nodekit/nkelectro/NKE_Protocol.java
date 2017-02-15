@@ -43,6 +43,7 @@ final class NKE_Protocol implements NKScriptExport
         options.put("js","lib_electro/protocol.js");
         NKE_Protocol protocol = new NKE_Protocol();
         context.loadPlugin(protocol, "io.nodekit.electro.protocol", options);
+        protocol.registerInternalProtocol("app");
     }
 
     private static HashMap<String, NKScriptValue> registeredSchemes  = new HashMap<>();
@@ -143,12 +144,12 @@ final class NKE_Protocol implements NKScriptExport
 
          public WebResourceResponse invoke(Map<String, Object> req)  {
             String scheme = ((String)req.get("scheme"));
-            if (!scheme.equals("internal")) { NKLogging.log("Unkown internal " + scheme);  return null; }
+            if (!scheme.equals("app")) { NKLogging.log("Unkown internal " + scheme);  return null; }
 
             try {
 
                 NKE_ProtocolCustomRequest nativeRequest = new NKE_ProtocolCustomRequest(req);
-                nativeRequest.callbackFile((String)req.get("path"));
+                nativeRequest.callbackFile("app.nkar" + (String)req.get("path"));
                 return new WebResourceResponse(nativeRequest.mimeType, "utf-8", nativeRequest.ins);
 
             } catch (Exception e) {
