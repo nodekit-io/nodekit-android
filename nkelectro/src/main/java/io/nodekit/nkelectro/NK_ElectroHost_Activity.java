@@ -20,9 +20,9 @@ package io.nodekit.nkelectro;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKApplication;
@@ -30,6 +30,8 @@ import io.nodekit.nkscripting.NKScriptContextFactory;
 import io.nodekit.nkscripting.util.NKLogging;
 
 import io.nodekit.nkscripting.util.NKEventEmitter;
+import io.nodekit.nkscripting.util.NKSerialize;
+import io.nodekit.nkscripting.util.NKStorage;
 
 public class NK_ElectroHost_Activity extends Activity implements NKScriptContext.NKScriptContextDelegate  {
 
@@ -47,36 +49,57 @@ public class NK_ElectroHost_Activity extends Activity implements NKScriptContext
         setContentView(R.layout.web_container);
         NKApplication.setAppContext(this);
 
-        if (options.containsKey("preloadURL")) {
+        if (!this.options.containsKey("main")) {
+            try {
+                String packageJson = NKStorage.getResource("app/app.nkar/package.json");
+                Map<String, Object> body = NKSerialize.deserialize(packageJson);
 
-            HashMap<String, Object> uiOptions = new HashMap<String, Object>();
-            uiOptions.put("nk.InstallElectro", false);
-            uiOptions.put("nk.ScriptContextDelegate", this);
+                if (body.containsKey("nodekit"))
+                {
+                    Map<String, Object>  config = (Map<String, Object> ) body.get("nodekit");
+                    if (config.containsKey("main")) {
+                        this.options.put("main", config.get("main"));
+                    } else if (body.containsKey("main"))
+                    {
+                        this.options.put("main", body.get("main"));
+                    }
+                }
 
-            if (options.containsKey("nk.allowCustomProtocol"))
-                uiOptions.put("nk.allowCustomProtocol", options.get("nk.allowCustomProtocol"));
+            } catch (Exception e) {
+                NKLogging.log(e);
+            }
+        }
 
-            if (options.containsKey("nk.taskBarPopup"))
-                uiOptions.put("nk.taskBarPopup", options.get("nk.taskBarPopup"));
+        if (options.containsKey("main") && ((String)options.get("main")).startsWith("app://")) {
 
-            if (options.containsKey("nk.taskBarIcon"))
-                uiOptions.put("nk.taskBarIcon", options.get("nk.taskBarIcon"));
+                HashMap<String, Object> uiOptions = new HashMap<String, Object>();
+                uiOptions.put("nk.InstallElectro", false);
+                uiOptions.put("nk.ScriptContextDelegate", this);
 
-            if (options.containsKey("width"))
-                uiOptions.put("width", options.get("width"));
-            if (options.containsKey("height"))
-                uiOptions.put("height", options.get("height"));
+                if (options.containsKey("nk.allowCustomProtocol"))
+                    uiOptions.put("nk.allowCustomProtocol", options.get("nk.allowCustomProtocol"));
 
-            if (options.containsKey("preloadURL"))
-                uiOptions.put("preloadURL", options.get("preloadURL"));
+                if (options.containsKey("nk.taskBarPopup"))
+                    uiOptions.put("nk.taskBarPopup", options.get("nk.taskBarPopup"));
 
-            if (options.containsKey("Engine"))
-                uiOptions.put("Engine", options.get("Engine"));
+                if (options.containsKey("nk.taskBarIcon"))
+                    uiOptions.put("nk.taskBarIcon", options.get("nk.taskBarIcon"));
 
-            if (options.containsKey("title"))
-                uiOptions.put("title", options.get("title"));
+                if (options.containsKey("width"))
+                    uiOptions.put("width", options.get("width"));
+                if (options.containsKey("height"))
+                    uiOptions.put("height", options.get("height"));
 
-            uiHostWindow = new NKE_BrowserWindow(uiOptions, null);
+                uiOptions.put("preloadURL", options.get("main"));
+
+                if (options.containsKey("Engine"))
+                    uiOptions.put("Engine", options.get("Engine"));
+
+                if (options.containsKey("title"))
+                    uiOptions.put("title", options.get("title"));
+
+                uiHostWindow = new NKE_BrowserWindow(uiOptions, null);
+
 
         }
 
@@ -110,12 +133,14 @@ public class NK_ElectroHost_Activity extends Activity implements NKScriptContext
     public void NKScriptEngineReady(NKScriptContext context) {
         NKLogging.log("ScriptEngine Ready");
 
-        String script = "process.bootstrap('app/index.js');";
+        if (this.options.containsKey("main")) {
+            String script = "process.bootstrap('app/" + (String)this.options.get("main") + "');";
 
-        try {
-            context.evaluateJavaScript(script, null);
-        } catch (Exception e) {
-            NKLogging.log(e);
+            try {
+                context.evaluateJavaScript(script, null);
+            } catch (Exception e) {
+                NKLogging.log(e);
+            }
         }
 
         NKEventEmitter.global.emit("NK.AppReady", "");

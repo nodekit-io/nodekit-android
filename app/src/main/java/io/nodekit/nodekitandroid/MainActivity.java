@@ -20,13 +20,9 @@ package io.nodekit.nodekitandroid;
 
 import io.nodekit.nkelectro.NK_ElectroHost_Activity;
 
-
 public class MainActivity extends  NK_ElectroHost_Activity {
 
     public MainActivity() {
-
        super();
-        this.options.put("preloadURL", "app://localhost/index.html");
     }
-
 }

@@ -1,7 +1,7 @@
 /*
 * nodekit.io
 *
-* Copyright (c) 2016 OffGrid Networks. All Rights Reserved.
+* Copyright (c) 2016-7 OffGrid Networks. All Rights Reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ final class NKE_Protocol implements NKScriptExport
             try {
 
                 NKE_ProtocolCustomRequest nativeRequest = new NKE_ProtocolCustomRequest(req);
-                nativeRequest.callbackFile("app.nkar" + (String)req.get("path"));
+                nativeRequest.callbackFile("app/" + (String)req.get("host") + (String)req.get("path"));
                 return new WebResourceResponse(nativeRequest.mimeType, "utf-8", nativeRequest.ins);
 
             } catch (Exception e) {
