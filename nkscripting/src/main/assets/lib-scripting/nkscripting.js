@@ -379,7 +379,16 @@
     if(JSON&&!JSON.dateParser){var reISO=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;JSON.dateParser=function(a,b){if("string"==typeof b){var c=reISO.exec(b);if(c)return new Date(b)}return b}}
 
     /* Polyfill Array fill */
-    Array.prototype.fill||(Array.prototype.fill=function(a){if(null==this)throw new TypeError("this is null or not defined");for(var b=Object(this),c=b.length>>>0,d=arguments[1],e=d>>0,f=e<0?Math.max(c+e,0):Math.min(e,c),g=arguments[2],h=void 0===g?c:g>>0,i=h<0?Math.max(c+h,0):Math.min(h,c);f<i;)b[f]=a,f++;return b});
-
+    if (!Array.prototype.fill) {
+      Object.defineProperty(Array.prototype, 'fill', {
+          enumerable: false,
+          value: function(a){
+            if(null==this)
+              throw new TypeError("this is null or not defined");
+            for(var b=Object(this),c=b.length>>>0,d=arguments[1],e=d>>0,f=e<0?Math.max(c+e,0):Math.min(e,c),g=arguments[2],h=void 0===g?c:g>>0,i=h<0?Math.max(c+h,0):Math.min(h,c);f<i;)
+              b[f]=a,f++;
+            return b
+          }
+      })
+    }
 })();
-
