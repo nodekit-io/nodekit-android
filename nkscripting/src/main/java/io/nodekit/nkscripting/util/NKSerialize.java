@@ -245,7 +245,7 @@ public class NKSerialize {
             NKLogging.log(e);
         }
 
-        NKLogging.log("WARNING:  COULD NOT SERIALIZE " + obj.toString());
+        NKLogging.log("WARNING:  COULD NOT SERIALIZE " + obj.toString(), NKLogging.Level.Warning);
 
         return obj.toString();
 

@@ -91,7 +91,7 @@ class NKE_BrowserWindow  implements NKScriptExport
 
             switch (browserType) {
                 case WebView:
-                    NKLogging.log("+creating Native (Android WebView) Renderer");
+                    NKLogging.log("creating Native (Android WebView) Renderer", NKLogging.Level.Info);
 
                     NKApplication.UIHandler.post(new Runnable() {
                         @Override

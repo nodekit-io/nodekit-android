@@ -85,7 +85,7 @@ class NKScriptInvocation
         Class[] paramInfos = m.getParameterTypes();
 
         if (args != null && args.length > paramInfos.length) {
-            NKLogging.log(String.format(Locale.US, "Too many js arguments passed to plugin method %s;  expected %d} got %d", m.getName(), paramInfos.length, args.length));
+            NKLogging.log(String.format(Locale.US, "Too many js arguments passed to plugin method %s;  expected %d} got %d", m.getName(), paramInfos.length, args.length), NKLogging.Level.Error);
             return null;
         }
 

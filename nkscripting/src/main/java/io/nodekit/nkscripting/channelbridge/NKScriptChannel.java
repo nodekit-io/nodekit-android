@@ -212,7 +212,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                         obj.invokeNativeMethod(opcode, al.toArray(), null);
 
                     } else {
-                        NKLogging.log(String.format("!Invalid member name: %s", opcode));
+                        NKLogging.log(String.format("Invalid member name: %s", opcode), NKLogging.Level.Error);
                     }
                 } else if (opcode.equals("+")) {
                     // Create instance
@@ -229,7 +229,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                         obj.didReceiveScriptMessage(message);
                     } else {
                         // discard unknown message
-                        NKLogging.log(String.format("!Unknown message: %s", message.body.toString()));
+                        NKLogging.log(String.format("Unknown message: %s", message.body.toString()), NKLogging.Level.Error);
                     }
                 }
             }
@@ -274,7 +274,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                         }
                         else
                         {
-                            NKLogging.log(String.format("!Invalid instance id: %s", target));
+                            NKLogging.log(String.format("Invalid instance id: %s", target), NKLogging.Level.Error);
                             result = false;
                         }
                     }
@@ -285,7 +285,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                         result = obj.invokeNativeMethodSync(opcode, al.toArray());
                     }
                     else {
-                        NKLogging.log(String.format("!Invalid member name: %s", opcode));
+                        NKLogging.log(String.format("Invalid member name: %s", opcode), NKLogging.Level.Error);
                         result = false;
                     }
                 }
@@ -308,7 +308,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                     else
                     {
                         // discard unknown message
-                        NKLogging.log(String.format("!Unknown message: %s", message.body.toString()));
+                        NKLogging.log(String.format("Unknown message: %s", message.body.toString()), NKLogging.Level.Error);
                         result = false;
                     }
                 }

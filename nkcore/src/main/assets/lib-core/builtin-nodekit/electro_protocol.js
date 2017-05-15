@@ -37,7 +37,7 @@ function BrowserServer(scheme) {
     EventEmitter.call(this)
     this.scheme = scheme.toLowerCase();
     protocol.registerCustomProtocol(scheme, this.invoke.bind(this));
-    console.log("+registered custom protocol" + scheme);
+    console.log("NKNodeKit registered custom protocol" + scheme);
 };
 
 util.inherits(BrowserServer, EventEmitter);

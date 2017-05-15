@@ -92,7 +92,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         this._sourceList = new ArrayList<NKScriptSource>();
         this._injectedPlugins = new ArrayList<NKScriptValue>();
         this._scriptMessageHandlers = new HashMap<String, NKScriptMessage.Handler>();
-        NKLogging.log("+NodeKit Renderer Android WebView E" + _id);
+        NKLogging.log("NodeKit Renderer Android WebView E" + _id, NKLogging.Level.Info);
     }
 
     @Override
@@ -120,8 +120,8 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
     }
 
     @JavascriptInterface
-    public void log(String msg) {
-        NKLogging.log(msg);
+    public void log(String msg, String severity, HashMap<String, String> labels) {
+        NKLogging.log(msg, severity, labels);
     }
 
     @JavascriptInterface
@@ -189,7 +189,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         String script3 = NKStorage.getResource("lib-scripting/promise.js");
 
         if (script3.isEmpty()) {
-            NKLogging.log("Failed to read provision script: promise");
+            NKLogging.log("Failed to read provision script: promise", NKLogging.Level.Error);
             return;
         }
 
@@ -231,7 +231,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
                 _injectedPlugins.add(scriptValue);
 
-                NKLogging.log("+NKScripting Plugin loaded with NKScripting channel at " + ns);
+                NKLogging.log("NKScripting Plugin loaded with NKScripting channel at " + ns, NKLogging.Level.Info);
 
                 break;
 
@@ -245,7 +245,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
                 _webview.addJavascriptInterface(plugin, nsobj);
 
-                NKLogging.log(String.format("+Plugin object %s is bound to %s (%s) with JavascriptInterface channel", plugin, ns, nsobj));
+                NKLogging.log(String.format("Plugin object %s is bound to %s (%s) with JavascriptInterface channel", plugin, ns, nsobj), NKLogging.Level.Info);
 
                 String globalstubber = "NKScripting.createProjection(\"" + ns + "\", " + nsobj + ");\n function plugin" + _id + "(){\n" + js + "\n}\n" + "plugin" + _id + "();" + "\n";
 
