@@ -74,12 +74,12 @@ public class NKLogging {
         log(message, severity, new HashMap<String, String>());
     }
 
-    public static void log(String message, String severity, HashMap<String, String> labels)
+    public static void log(String message, String severity, Map<String, String> labels)
     {
         log(message, Level.valueOf(severity), labels);
     }
 
-    public static void log(String message, Level severity, HashMap<String, String> labels)
+    public static void log(String message, Level severity, Map<String, String> labels)
     {
         Log.v(TAG, message);
         NKEventEmitter.global.emit("log", new Entry(message, severity, labels));

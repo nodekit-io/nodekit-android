@@ -58,8 +58,8 @@ allprojects {
 ``` gradle
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.github.nodekit-io.nodekit-android:nkscripting:v1.0.13'
-    compile 'com.github.nodekit-io.nodekit-android:nkelectro:v1.0.13'
+    compile 'com.github.nodekit-io.nodekit-android:nkscripting:v1.0.14'
+    compile 'com.github.nodekit-io.nodekit-android:nkelectro:v1.0.14'
 }
 ```
 

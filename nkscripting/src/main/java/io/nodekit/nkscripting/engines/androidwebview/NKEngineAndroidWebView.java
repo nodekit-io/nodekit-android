@@ -169,8 +169,6 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
     private void prepareEnvironment() throws Exception {
 
-        NKLogging.log(_webview.toString());
-
         _webview.addJavascriptInterface(this, "NKScriptingBridge");
 
         String script1 = NKStorage.getResource("lib-scripting/nkscripting.js");
