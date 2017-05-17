@@ -45,6 +45,10 @@ public class NKLogging {
             return severity.toString();
         }
 
+        public Level getSeverityLevel() {
+            return severity;
+        }
+
         public Map<String, String> getLabels() {
             return labels;
         }
