@@ -58,8 +58,8 @@ allprojects {
 ``` gradle
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.github.nodekit-io.nodekit-android:nkscripting:v1.0.12'
-    compile 'com.github.nodekit-io.nodekit-android:nkelectro:v1.0.12'
+    compile 'com.github.nodekit-io.nodekit-android:nkscripting:v1.0.13'
+    compile 'com.github.nodekit-io.nodekit-android:nkelectro:v1.0.13'
 }
 ```
 
@@ -155,6 +155,7 @@ Apache 2.0
 We went for platform specific code to allow searching by language on GitHub to show up appropriately (e.g., trending repositories in Swift, C#), to allow separate version numbers for minor platform-specific changes, and because the repositories are in essence not dependent on each other, but rather complementary language ports with the same functionality and API.
 
 ## News
+* (May 2017) Enhanced logging
 * (October 2016) Command line tooling added for Android
 * (September 2016) Initial Android release (NKScripting and NKElectro only)
 * (March 2016) Added sample application, a beautiful lightweight chat application to highlight how to use {NK} NodeKit 

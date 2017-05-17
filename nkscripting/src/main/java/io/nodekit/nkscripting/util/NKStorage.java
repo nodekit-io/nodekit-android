@@ -133,7 +133,7 @@ public class NKStorage implements NKScriptExport {
 
             stream.close();
         } catch (IOException e) {
-            NKLogging.log("Error reading " + fileName + ": " + e.toString(), NKLogging.Level.Error);
+            NKLogging.log(e);
         }
 
         return sb.toString();
@@ -159,7 +159,7 @@ public class NKStorage implements NKScriptExport {
             }
             stream.close();
         } catch (IOException e) {
-            NKLogging.log("Error reading " + fileName + ": " + e.toString(), NKLogging.Level.Error);
+            NKLogging.log(e);
         }
 
         return byteArrayOutputStream.toByteArray();
@@ -185,7 +185,7 @@ public class NKStorage implements NKScriptExport {
 
             stream.close();
         } catch (IOException e) {
-            NKLogging.log("Error reading " + fileName + ": " + e.toString(), NKLogging.Level.Error);
+            NKLogging.log(e);
         }
 
         return sb.toString();
@@ -210,7 +210,7 @@ public class NKStorage implements NKScriptExport {
 
         }
 
-        NKLogging.log("Error reading " + fileName , NKLogging.Level.Error);
+        NKLogging.log("NKNodeKit Error reading " + fileName , NKLogging.Level.Error);
 
         return null;
     }
@@ -255,7 +255,7 @@ public class NKStorage implements NKScriptExport {
                     return true;
         }
 
-        NKLogging.log("Not found" + module, NKLogging.Level.Error);
+        NKLogging.log("NKNodeKit Not found" + module, NKLogging.Level.Error);
 
         return false;
     }

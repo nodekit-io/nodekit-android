@@ -92,7 +92,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         this._sourceList = new ArrayList<NKScriptSource>();
         this._injectedPlugins = new ArrayList<NKScriptValue>();
         this._scriptMessageHandlers = new HashMap<String, NKScriptMessage.Handler>();
-        NKLogging.log("NodeKit Renderer Android WebView E" + _id, NKLogging.Level.Info);
+        NKLogging.log("NKNodeKit Renderer Android WebView E" + _id, NKLogging.Level.Info);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         for (NKScriptSource source : _sourceList) {
             try {
-                NKLogging.log("-->" + source.filename);
+                NKLogging.log(source.filename);
                 source.inject(this);
             } catch (Exception e) {
                 NKLogging.log(e);
@@ -126,7 +126,6 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
     @JavascriptInterface
     public String didReceiveScriptMessageSync(String channel, String message) throws Exception {
-        NKLogging.log(message);
         if (this._scriptMessageHandlers.containsKey(channel))
         {
             NKScriptMessage.Handler scriptHandler = _scriptMessageHandlers.get(channel);
@@ -142,8 +141,6 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
     @JavascriptInterface
     public void didReceiveScriptMessage(String channel, String message) throws Exception {
-        NKLogging.log(message);
-
         if (this._scriptMessageHandlers.containsKey(channel))
         {
             NKScriptMessage.Handler scriptHandler = _scriptMessageHandlers.get(channel);
@@ -231,7 +228,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
                 _injectedPlugins.add(scriptValue);
 
-                NKLogging.log("NKScripting Plugin loaded with NKScripting channel at " + ns, NKLogging.Level.Info);
+                NKLogging.log("NKNodeKit Plugin loaded with NKScripting channel at " + ns, NKLogging.Level.Info);
 
                 break;
 
@@ -245,7 +242,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
                 _webview.addJavascriptInterface(plugin, nsobj);
 
-                NKLogging.log(String.format("Plugin object %s is bound to %s (%s) with JavascriptInterface channel", plugin, ns, nsobj), NKLogging.Level.Info);
+                NKLogging.log(String.format("NKNodeKit Plugin object %s is bound to %s (%s) with JavascriptInterface channel", plugin, ns, nsobj), NKLogging.Level.Info);
 
                 String globalstubber = "NKScripting.createProjection(\"" + ns + "\", " + nsobj + ");\n function plugin" + _id + "(){\n" + js + "\n}\n" + "plugin" + _id + "();" + "\n";
 

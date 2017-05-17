@@ -19,16 +19,19 @@
 package io.nodekit.nkscripting.util;
 
 import android.util.Log;
+import java.util.Map;
 import java.util.HashMap;
+import java.util.Arrays;
 
 public class NKLogging {
 
     public static class Entry {
         String message = null;
         Level severity = null;
-        HashMap<String, String> labels = null;
+        Map<String, String> labels = null;
 
-        Entry(String message, Level severity, HashMap<String, String> labels){
+
+        Entry(String message, Level severity, Map<String, String> labels){
             this.severity = severity;
             this.message = message;
             this.labels = labels;
@@ -42,7 +45,7 @@ public class NKLogging {
             return severity.toString();
         }
 
-        public HashMap<String, String>  getLabels() {
+        public Map<String, String> getLabels() {
             return labels;
         }
     }
@@ -84,8 +87,7 @@ public class NKLogging {
 
     public static void log(Exception e)
     {
-        log("ERROR " + e.toString(), Level.Error, new HashMap<String, String>() );
-        e.printStackTrace();
+        log("ERROR " + e.toString() + " in " +  Arrays.toString(e.getStackTrace()), Level.Error, new HashMap<String, String>() );
     }
 
 }
