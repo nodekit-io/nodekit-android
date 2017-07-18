@@ -112,6 +112,20 @@ BootstrapModule.prototype.require = function (id) {
         id = _absolutePath(this.__dirname + '/', id);
     }
 
+    var cached;
+
+    var isPossibleDirectoryRequire = id.indexOf('index.js') == -1;
+    var directoryIndexId = id + '/index.js';
+
+    if (isPossibleDirectoryRequire) {
+
+        cached = BootstrapModule.getCached(directoryIndexId);
+
+        if (cached) {
+            return cached.exports
+        }
+    }
+
     var cached = BootstrapModule.getCached(id);
     if (cached) {
         return cached.exports;
@@ -124,6 +138,11 @@ BootstrapModule.prototype.require = function (id) {
     bootstrapModule.cache();
 
     bootstrapModule.load();
+
+    if (Object.keys(bootstrapModule.exports).length == 0 && isPossibleDirectoryRequire) {
+
+        return BootstrapModule.require(directoryIndexId)
+    }
 
     return bootstrapModule.exports;
 };
