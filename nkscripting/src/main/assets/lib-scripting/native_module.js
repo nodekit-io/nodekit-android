@@ -61,7 +61,7 @@ var BootstrapModule = function BootstrapModule(id) {
     this.__dirname = id.substring(0, id.lastIndexOf('/'));
 
     this.id = id;
-    this.exports = {};
+    this.exports = null;
     this.loaded = false;
     this.bootstrapper = true;
 }
@@ -114,7 +114,7 @@ BootstrapModule.prototype.require = function (id) {
 
     var cached;
 
-    var isPossibleDirectoryRequire = id.indexOf('index.js') == -1;
+    var isPossibleDirectoryRequire = id.indexOf('.js') == -1;
     var directoryIndexId = id + '/index.js';
 
     if (isPossibleDirectoryRequire) {
@@ -139,7 +139,7 @@ BootstrapModule.prototype.require = function (id) {
 
     bootstrapModule.load();
 
-    if (Object.keys(bootstrapModule.exports).length == 0 && isPossibleDirectoryRequire) {
+    if (bootstrapModule.exports === null && isPossibleDirectoryRequire) {
 
         return BootstrapModule.require(directoryIndexId)
     }
