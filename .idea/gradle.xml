@@ -8,11 +8,11 @@
         <option name="gradleHome" value="$APPLICATION_HOME_DIR$/gradle/gradle-2.14.1" />
         <option name="modules">
           <set>
-            <option value="/Volumes/DATA/Projects/nodekit-android" />
-            <option value="/Volumes/DATA/Projects/nodekit-android/app" />
-            <option value="/Volumes/DATA/Projects/nodekit-android/nkcore" />
-            <option value="/Volumes/DATA/Projects/nodekit-android/nkelectro" />
-            <option value="/Volumes/DATA/Projects/nodekit-android/nkscripting" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/nkcore" />
+            <option value="$PROJECT_DIR$/nkelectro" />
+            <option value="$PROJECT_DIR$/nkscripting" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

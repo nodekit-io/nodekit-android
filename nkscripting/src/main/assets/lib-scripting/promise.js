@@ -195,7 +195,7 @@
 
   Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
     if (typeof console !== 'undefined' && console) {
-      let moreInfo = " in method " + err.stack
+      var moreInfo = " in method " + err.stack
       console.error('Unhandled Promise Rejection:' + err.toString() + moreInfo);
     }
   };
@@ -220,15 +220,16 @@
       throw new TypeError('Cannot call a class as a function');
     }
 
-    const promise = new OriginalPromise((resolve, reject) =>
-      executor(resolve, arg => {
-        OriginalPromise.resolve().then(() => {
+    const promise = new OriginalPromise(function(resolve, reject) {
+      executor(function(resolve, arg) {
+        OriginalPromise.resolve().then(function() {
           if (promise._handled !== true) {
             InstrumentedPromise._unhandledRejectionFn(arg);
           }
         });
         return reject(arg);
-      }));
+      });
+     });
 
     promise.__proto__ = InstrumentedPromise.prototype;
 
@@ -240,8 +241,9 @@
   InstrumentedPromise.prototype.__proto__ = OriginalPromise.prototype;
 
   InstrumentedPromise.prototype.then = function then(onFulfilled, onRejected) {
-    return OriginalPromise.prototype.then.call(this, onFulfilled, onRejected ? arg => {
-      this._handled = true;
+    var _this = this;
+    return OriginalPromise.prototype.then.call(this, onFulfilled, onRejected ? function(arg) {
+      _this._handled = true;
       return onRejected(arg);
     } : null);
   };
@@ -251,7 +253,7 @@
   };
 
   InstrumentedPromise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
-    let moreInfo = " in method " + err.stack
+    var moreInfo = " in method " + err.stack
     console.error('Unhandled Promise Rejection:' + err.toString() + moreInfo);
   }
 
