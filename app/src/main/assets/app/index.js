@@ -22,6 +22,14 @@ console.log("STARTING SAMPLE ELECTRO APPLICATION");
 
 protocol.interceptInternalProtocol("internal");
 
+const functionExport = require("./subdirectory")
+
+functionExport()
+
+const secondFunction = require("./subdirectory/index")
+
+secondFunction()
+
 nodekit.on("ready", function() {
 
            var p = new BrowserWindow({ 'preloadURL': 'internal://localhost/app/index.html',
@@ -31,7 +39,7 @@ nodekit.on("ready", function() {
                                      'width': 300,
                                      'height': 600
                                      });
-          
+
            console.log("Server running");
      });
 

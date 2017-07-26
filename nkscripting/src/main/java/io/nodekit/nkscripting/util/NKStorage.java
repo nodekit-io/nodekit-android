@@ -83,7 +83,13 @@ public class NKStorage implements NKScriptExport {
             module += ".js";
         }
 
-        return NKStorage.getResourceBase64(module);
+        String base64 = NKStorage.getResourceBase64(module);
+
+        if (base64 != null) {
+            return base64;
+        } else {
+            return "";
+        }
     }
 
     @JavascriptInterface
