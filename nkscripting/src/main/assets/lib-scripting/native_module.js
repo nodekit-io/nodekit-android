@@ -61,7 +61,7 @@ var BootstrapModule = function BootstrapModule(id) {
     this.__dirname = id.substring(0, id.lastIndexOf('/'));
 
     this.id = id;
-    this.exports = null;
+    this.exports = {};
     this.loaded = false;
     this.bootstrapper = true;
 }
@@ -139,8 +139,9 @@ BootstrapModule.prototype.require = function (id) {
 
     bootstrapModule.load();
 
-    if (bootstrapModule.exports === null && isPossibleDirectoryRequire) {
+    var emptyExport = typeof bootstrapModule.exports != 'function' && Object.keys(bootstrapModule.exports) == 0
 
+    if (emptyExport && isPossibleDirectoryRequire) {
         return BootstrapModule.require(directoryIndexId)
     }
 
