@@ -127,11 +127,17 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         _webview.getSettings().setJavaScriptEnabled(false);
         _webview.stopLoading();
 
+        _sourceList.clear();
+        _scriptMessageHandlers.clear();
+        _injectedPlugins.clear();
+
         ViewParent parent = _webview.getParent();
         if (parent instanceof ViewGroup) {
             ViewGroup group = (ViewGroup)parent;
             group.removeView(_webview);
         }
+
+        _webview = null;
     }
 
     @JavascriptInterface
