@@ -30,6 +30,10 @@ const secondFunction = require("./subdirectory/index")
 
 secondFunction()
 
+setInterval(function() {
+    console.log("timer fire")
+}, 2000)
+
 nodekit.on("ready", function() {
 
            var p = new BrowserWindow({ 'preloadURL': 'internal://localhost/app/index.html',
