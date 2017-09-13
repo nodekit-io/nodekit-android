@@ -35,6 +35,8 @@ public interface NKScriptContext
 
     String serialize(Object obj) throws Exception ;
 
+    void tearDown();
+
     interface NKScriptContextDelegate {
 
         void NKScriptEngineDidLoad(NKScriptContext context);

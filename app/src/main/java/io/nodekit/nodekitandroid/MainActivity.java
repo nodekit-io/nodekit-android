@@ -38,6 +38,8 @@ import android.widget.Button;
 
 public class MainActivity extends Activity implements NKScriptContext.NKScriptContextDelegate, android.view.View.OnClickListener {
 
+    private boolean isRunning = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,18 +65,34 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
     public void onClick(android.view.View v) {
         switch (v.getId()) {
             case  R.id.button: {
-                String script = "process.bootstrap('app/index.js');";
-
-                try {
-                    context.evaluateJavaScript(script, null);
-                    NKEventEmitter.global.emit("NK.AppReady", "");
-                } catch (Exception e) {
-                    NKLogging.log(e);
+                if (this.isRunning) {
+                    stop();
+                } else {
+                    start();
                 }
                 break;
             }
 
         }
+    }
+
+    void start() {
+
+        String script = "process.bootstrap('app/index.js');";
+
+        try {
+            context.evaluateJavaScript(script, null);
+            NKEventEmitter.global.emit("NK.AppReady", "");
+            isRunning = true;
+        } catch (Exception e) {
+            NKLogging.log(e);
+        }
+    }
+
+    void stop() {
+        context.tearDown();
+        context = null;
+        isRunning = false;
     }
 
     public void NKScriptEngineDidLoad(NKScriptContext context) {

@@ -21,6 +21,7 @@ package io.nodekit.nkscripting.engines.androidwebview;
 import android.annotation.SuppressLint;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -117,6 +118,26 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
     public int id() throws Exception {
         return _id;
+    }
+
+    @Override
+    public void tearDown() {
+
+        _webview.pauseTimers();
+        _webview.getSettings().setJavaScriptEnabled(false);
+        _webview.stopLoading();
+
+        _sourceList.clear();
+        _scriptMessageHandlers.clear();
+        _injectedPlugins.clear();
+
+        ViewParent parent = _webview.getParent();
+        if (parent instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup)parent;
+            group.removeView(_webview);
+        }
+
+        _webview = null;
     }
 
     @JavascriptInterface
