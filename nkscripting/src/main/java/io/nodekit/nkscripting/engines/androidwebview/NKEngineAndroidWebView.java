@@ -123,7 +123,6 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
     @Override
     public void tearDown() {
 
-        _webview.pauseTimers();
         _webview.getSettings().setJavaScriptEnabled(false);
         _webview.stopLoading();
 
@@ -137,6 +136,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
             group.removeView(_webview);
         }
 
+        _webview.destroy();
         _webview = null;
     }
 

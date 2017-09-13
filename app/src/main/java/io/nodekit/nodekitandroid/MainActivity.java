@@ -50,14 +50,7 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
         mClickButton1.setOnClickListener(this);
 
         NKEventEmitter.global.emit("NK.AppReady", "");
-        try {
-            NKScriptContextFactory.createContext(null, this);
-        }
-        catch (Exception e) {
-            Log.v("NodeKitAndroid", e.toString());
-        }
     }
-
 
 
 // somewhere else in your code
@@ -78,14 +71,11 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
 
     void start() {
 
-        String script = "process.bootstrap('app/index.js');";
-
         try {
-            context.evaluateJavaScript(script, null);
-            NKEventEmitter.global.emit("NK.AppReady", "");
-            isRunning = true;
-        } catch (Exception e) {
-            NKLogging.log(e);
+            NKScriptContextFactory.createContext(null, this);
+        }
+        catch (Exception e) {
+            Log.v("NodeKitAndroid", e.toString());
         }
     }
 
@@ -111,9 +101,22 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
     private NKScriptContext context;
 
     public void NKScriptEngineReady(NKScriptContext context) {
+
         NKLogging.log("ScriptEngine Ready");
 
-
+        bootstrap();
     }
 
+    void bootstrap() {
+
+        String script = "process.bootstrap('app/index.js');";
+
+        try {
+            context.evaluateJavaScript(script, null);
+            NKEventEmitter.global.emit("NK.AppReady", "");
+            isRunning = true;
+        } catch (Exception e) {
+            NKLogging.log(e);
+        }
+    }
 }
