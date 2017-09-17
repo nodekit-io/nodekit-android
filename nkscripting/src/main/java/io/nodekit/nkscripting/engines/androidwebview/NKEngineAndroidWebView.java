@@ -46,16 +46,12 @@ import io.nodekit.nkscripting.channelbridge.NKScriptMessage;
 import io.nodekit.nkscripting.NKScriptExport.NKScriptExportType;
 
 public class NKEngineAndroidWebView extends WebViewClient implements NKScriptContext, NKScriptMessage.Controller {
+
     @SuppressLint("setJavaScriptEnabled")
     public static void createContextWebView(HashMap<String, Object> options, NKScriptContextDelegate callback) throws Exception {
-        WebView.setWebContentsDebuggingEnabled(true);
 
-        ViewGroup _root = (ViewGroup) NKApplication.getRootView().findViewById(android.R.id.content);
-        ViewGroup mWebContainer = (ViewGroup) _root.getChildAt(0);
-        WebView webView = new WebView(NKApplication.getAppContext());
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.setVisibility(View.INVISIBLE);
-        mWebContainer.addView(webView);
+        WebView webView = NKApplication.createInvisibleWebViewInWindow();
+
         int id = NKScriptContextFactory.sequenceNumber++;
         addJSContextWebView(id, webView, options, callback);
      }
