@@ -98,6 +98,9 @@ class NKScriptValueNative extends NKScriptValue {
 
 
     private NKScriptInvocation bindObject(Object obj) {
+        if (obj == null) {
+            return null;
+        }
         nativeObject = obj;
         NKScriptInvocation proxy = new NKScriptInvocation(obj);
         NKScriptValue.setForObject(obj, this);

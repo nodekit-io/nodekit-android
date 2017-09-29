@@ -22,10 +22,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -44,6 +48,7 @@ public class NKApplication {
     }
 
     public static void setAppContext(Context context) {
+
         mContext = context;
     }
 
@@ -88,6 +93,11 @@ public class NKApplication {
     }
 
     private static boolean checkSystemAlertPermission() {
+
+        if (Build.VERSION.SDK_INT >= 23) {
+
+            return Settings.canDrawOverlays(getAppContext());
+        }
 
         int res = mContext.checkCallingOrSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW);
 
