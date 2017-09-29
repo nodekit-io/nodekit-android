@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
 
@@ -49,6 +50,11 @@ public class NKApplication {
 
     public static void setAppContext(Context context) {
 
+        if (!checkSystemAlertPermission() && !(context instanceof Activity)) {
+
+            throw new RuntimeException("Must either grant SYSTEM_ALERT_WINDOW permission or pass an Activity to setAppContext");
+        }
+
         mContext = context;
     }
 
@@ -60,36 +66,47 @@ public class NKApplication {
             throw new RuntimeException("Must call NKApplication.setAppContext before creating an NKScriptContext");
         }
 
-        if (!checkSystemAlertPermission()) {
-
-            throw new RuntimeException("Must grant " + Manifest.permission.SYSTEM_ALERT_WINDOW + " permission to run in backgroud.");
-        }
-
         WebView.setWebContentsDebuggingEnabled(true);
 
         WebView webView = new WebView(mContext);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setVisibility(View.INVISIBLE);
 
-        final WindowManager windowManager = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT
-        );
+        if (checkSystemAlertPermission()) {
 
-        params.gravity = Gravity.TOP | Gravity.START;
-        params.x = 0;
-        params.y = 0;
-        params.width = 0;
-        params.height = 0;
+            WindowManager windowManager = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_PHONE,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    PixelFormat.TRANSLUCENT
+            );
 
-        windowManager.addView(webView, params);
+            params.gravity = Gravity.TOP | Gravity.START;
+            params.x = 0;
+            params.y = 0;
+            params.width = 0;
+            params.height = 0;
+
+            windowManager.addView(webView, params);
+
+        } else {
+
+            WebView.setWebContentsDebuggingEnabled(true);
+
+            ViewGroup _root = (ViewGroup) NKApplication.getRootView().findViewById(android.R.id.content);
+            ViewGroup mWebContainer = (ViewGroup) _root.getChildAt(0);
+            mWebContainer.addView(webView);
+        }
 
         return webView;
+    }
+
+    private static View getRootView() {
+
+        return ((Activity)mContext).getWindow();
     }
 
     private static boolean checkSystemAlertPermission() {
