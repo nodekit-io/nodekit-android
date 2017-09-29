@@ -22,10 +22,8 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -106,7 +104,7 @@ public class NKApplication {
 
     private static View getRootView() {
 
-        return ((Activity)mContext).getWindow();
+        return ((Activity)mContext).getWindow().getDecorView().getRootView();
     }
 
     private static boolean checkSystemAlertPermission() {
