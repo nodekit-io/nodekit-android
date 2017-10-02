@@ -19,7 +19,11 @@
 package io.nodekit.nodekitandroid;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -71,6 +75,11 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
 
     void start() {
 
+        if (!checkDrawOverlayPermission()) {
+
+            return;
+        }
+
         try {
             NKScriptContextFactory.createContext(null, this);
         }
@@ -83,6 +92,38 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
         context.tearDown();
         context = null;
         isRunning = false;
+    }
+
+    public final static int REQUEST_CODE = -1010101;
+
+    public boolean checkDrawOverlayPermission() {
+
+        if (Build.VERSION.SDK_INT >= 23) {
+
+            if (!Settings.canDrawOverlays(this)) {
+
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+
+                startActivityForResult(intent, REQUEST_CODE);
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
+
+        if (requestCode == REQUEST_CODE && Build.VERSION.SDK_INT >= 23) {
+
+            if (Settings.canDrawOverlays(this)) {
+
+                start();
+            }
+        }
     }
 
     public void NKScriptEngineDidLoad(NKScriptContext context) {

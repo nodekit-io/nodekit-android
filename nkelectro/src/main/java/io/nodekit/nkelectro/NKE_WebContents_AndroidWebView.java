@@ -185,13 +185,7 @@ class NKE_WebContents_AndroidWebView extends NKE_WebContents implements NKScript
     {
 
         this.options = options;
-        FrameLayout _root = (FrameLayout) NKApplication.getRootView().findViewById(android.R.id.content);
-        FrameLayout mWebContainer = (FrameLayout) _root.getChildAt(0);
-        WebView webView = new WebView(NKApplication.getAppContext());
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.setVisibility(View.VISIBLE);
-        mWebContainer.addView(webView);
-        this.webView = webView;
+        this.webView = NKApplication.createInvisibleWebViewInWindow();
         _browserWindow.webView = webView;
 
         try {
