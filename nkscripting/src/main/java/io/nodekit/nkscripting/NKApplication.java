@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,7 @@ public class NKApplication {
 
     public static void setAppContext(Context context) {
 
-        if (!checkSystemAlertPermission() && !(context instanceof Activity)) {
+        if (!checkSystemAlertPermission(context) && !(context instanceof Activity)) {
 
             throw new RuntimeException("Must either grant SYSTEM_ALERT_WINDOW permission or pass an Activity to setAppContext");
         }
@@ -70,7 +71,7 @@ public class NKApplication {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setVisibility(View.INVISIBLE);
 
-        if (checkSystemAlertPermission()) {
+        if (checkSystemAlertPermission(mContext)) {
 
             WindowManager windowManager = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -107,14 +108,14 @@ public class NKApplication {
         return ((Activity)mContext).getWindow().getDecorView().getRootView();
     }
 
-    private static boolean checkSystemAlertPermission() {
+    private static boolean checkSystemAlertPermission(@NonNull Context context) {
 
         if (Build.VERSION.SDK_INT >= 23) {
 
-            return Settings.canDrawOverlays(getAppContext());
+            return Settings.canDrawOverlays(context);
         }
 
-        int res = mContext.checkCallingOrSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW);
+        int res = context.checkCallingOrSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW);
 
         return (res == PackageManager.PERMISSION_GRANTED);
     }
