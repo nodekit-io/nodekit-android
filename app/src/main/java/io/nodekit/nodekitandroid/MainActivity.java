@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -150,14 +151,22 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
 
     void bootstrap() {
 
-        String script = "process.bootstrap('app/index.js');";
+        Handler handler = new Handler(getMainLooper(), null);
 
-        try {
-            context.evaluateJavaScript(script, null);
-            NKEventEmitter.global.emit("NK.AppReady", "");
-            isRunning = true;
-        } catch (Exception e) {
-            NKLogging.log(e);
-        }
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String script = "process.bootstrap('app/index.js');";
+                    context.evaluateJavaScript(script, null);
+                    NKEventEmitter.global.emit("NK.AppReady", "");
+                    isRunning = true;
+                } catch (Exception e) {
+                    NKLogging.log(e);
+                }
+            }
+        }, 10000);
+
+
     }
 }

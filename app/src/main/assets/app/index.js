@@ -31,8 +31,15 @@ const secondFunction = require("./subdirectory/index")
 secondFunction()
 
 setInterval(function() {
-    console.log("timer fire")
-}, 2000)
+    console.log("recurring timer fire")
+}, 2500)
+
+setTimeout(function() {
+    console.log("single timer fire")
+    setTimeout(function() {
+        console.log("second timer fire")
+    }, 2000)
+}, 15000)
 
 nodekit.on("ready", function() {
 

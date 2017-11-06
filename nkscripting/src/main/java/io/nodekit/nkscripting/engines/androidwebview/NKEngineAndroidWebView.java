@@ -208,6 +208,8 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         this.injectJavaScript(new NKScriptSource(script3, "io.nodekit.scripting/NKScripting/promise.js", "Promise"));
 
+        loadTimerScript();
+
         NKStorage.attachTo(this);
         NKTimer.attachTo(this);
 
@@ -216,6 +218,18 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
        if (_webview.getVisibility() != View.VISIBLE)
           _webview.loadDataWithBaseURL("", "<html><body>NodeKit Running</body></html>", "text/html", "UTF-8", "");
 
+    }
+
+    private void loadTimerScript() throws Exception {
+
+        String timerSource = NKStorage.getResource("lib-scripting/timer.js");
+
+        if (timerSource == null || timerSource.isEmpty()) {
+            NKLogging.log("Failed to read provision script: promise", NKLogging.Level.Error);
+            return;
+        }
+
+        this.injectJavaScript(new NKScriptSource(timerSource, "io.nodekit.scripting/NKScripting/timer.js", "io.nodekit.scripting.timer"));
     }
 
 

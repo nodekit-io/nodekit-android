@@ -51,7 +51,7 @@ public class NKTimer implements NKScriptExport {
     }
 
     @JavascriptInterface
-    public String setTimeout(NKScriptValue callback, Double milliseconds) {
+    public String setTimeoutSync(NKScriptValue callback, Double milliseconds) {
 
         Long delay = milliseconds.longValue();
 
@@ -72,7 +72,7 @@ public class NKTimer implements NKScriptExport {
     }
 
     @JavascriptInterface
-    String setInterval(NKScriptValue callback, Double milliseconds) {
+    public String setIntervalSync(NKScriptValue callback, Double milliseconds) {
 
         Long delay = milliseconds.longValue();
 
@@ -93,7 +93,7 @@ public class NKTimer implements NKScriptExport {
     }
 
     @JavascriptInterface
-    void clearTimeout(String identifier) {
+    public void clearTimeoutSync(String identifier) {
 
         NKTimerTask task = tasks.remove(identifier);
 
@@ -116,7 +116,7 @@ public class NKTimer implements NKScriptExport {
 
         if (!task.isRepeating()) {
 
-            clearTimeout(identifier);
+            clearTimeoutSync(identifier);
         }
 
         Handler mainHandler = new Handler(NKApplication.getAppContext().getMainLooper());
