@@ -44,6 +44,7 @@ import io.nodekit.nkscripting.util.NKSerialize;
 import io.nodekit.nkscripting.channelbridge.NKScriptChannel;
 import io.nodekit.nkscripting.channelbridge.NKScriptMessage;
 import io.nodekit.nkscripting.NKScriptExport.NKScriptExportType;
+import io.nodekit.nkscripting.util.NKTimer;
 
 public class NKEngineAndroidWebView extends WebViewClient implements NKScriptContext, NKScriptMessage.Controller {
 
@@ -208,6 +209,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         this.injectJavaScript(new NKScriptSource(script3, "io.nodekit.scripting/NKScripting/promise.js", "Promise"));
 
         NKStorage.attachTo(this);
+        NKTimer.attachTo(this);
 
         callback.NKScriptEngineDidLoad(this);
 
