@@ -201,7 +201,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         String script3 = NKStorage.getResource("lib-scripting/promise.js");
 
-        if (script3.isEmpty()) {
+        if (script3 != null && script3.isEmpty()) {
             NKLogging.log("Failed to read provision script: promise", NKLogging.Level.Error);
             return;
         }
