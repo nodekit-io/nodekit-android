@@ -151,22 +151,13 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
 
     void bootstrap() {
 
-        Handler handler = new Handler(getMainLooper(), null);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String script = "process.bootstrap('app/index.js');";
-                    context.evaluateJavaScript(script, null);
-                    NKEventEmitter.global.emit("NK.AppReady", "");
-                    isRunning = true;
-                } catch (Exception e) {
-                    NKLogging.log(e);
-                }
-            }
-        }, 10000);
-
-
+        try {
+            String script = "process.bootstrap('app/index.js');";
+            context.evaluateJavaScript(script, null);
+            NKEventEmitter.global.emit("NK.AppReady", "");
+            isRunning = true;
+        } catch (Exception e) {
+            NKLogging.log(e);
+        }
     }
 }
