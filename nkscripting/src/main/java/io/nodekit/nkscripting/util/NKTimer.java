@@ -51,16 +51,16 @@ public class NKTimer implements NKScriptExport {
     }
 
     @JavascriptInterface
-    public String setTimeoutSync(NKScriptValue callback, Double milliseconds) {
+    public String setTimeoutSync(NKScriptValue callback, Number milliseconds) {
 
         Long delay = milliseconds.longValue();
 
-        String uuid = newUUID();
+        final String uuid = newUUID();
 
         ScheduledFuture<?> future = executor.schedule(new Runnable() {
             @Override
             public void run() {
-
+                handlerTaskFire(uuid);
             }
         }, delay, TimeUnit.MILLISECONDS);
 
@@ -72,7 +72,7 @@ public class NKTimer implements NKScriptExport {
     }
 
     @JavascriptInterface
-    public String setIntervalSync(NKScriptValue callback, Double milliseconds) {
+    public String setIntervalSync(NKScriptValue callback, Number milliseconds) {
 
         Long delay = milliseconds.longValue();
 
