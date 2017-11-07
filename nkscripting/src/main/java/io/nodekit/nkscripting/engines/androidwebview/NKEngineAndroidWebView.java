@@ -225,7 +225,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         String timerSource = NKStorage.getResource("lib-scripting/timer.js");
 
         if (timerSource == null || timerSource.isEmpty()) {
-            NKLogging.log("Failed to read provision script: promise", NKLogging.Level.Error);
+            NKLogging.log("Failed to read provision script: timer", NKLogging.Level.Error);
             return;
         }
 
