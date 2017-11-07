@@ -20,6 +20,8 @@ package io.nodekit.nkscripting.util;
 
 import android.os.Handler;
 import android.webkit.JavascriptInterface;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -83,7 +85,7 @@ public class NKTimer implements NKScriptExport {
             public void run() {
                 handlerTaskFire(uuid);
             }
-        }, 0, delay, TimeUnit.MILLISECONDS);
+        }, delay, delay, TimeUnit.MILLISECONDS);
 
         NKTimerTask task = new NKTimerTask(future, callback, true);
 
@@ -98,6 +100,16 @@ public class NKTimer implements NKScriptExport {
         NKTimerTask task = tasks.remove(identifier);
 
         if (task != null) {
+
+            task.cancel();
+        }
+    }
+
+    void clearAllTimers() {
+
+        Collection<NKTimerTask> tasks = this.tasks.values();
+
+        for (NKTimerTask task : tasks) {
 
             task.cancel();
         }
@@ -144,5 +156,15 @@ public class NKTimer implements NKScriptExport {
         } while (tasks.get(uuid) != null);
 
         return uuid;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            clearAllTimers();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        super.finalize();
     }
 }
