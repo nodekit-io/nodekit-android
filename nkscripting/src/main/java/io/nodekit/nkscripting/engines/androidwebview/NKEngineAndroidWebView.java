@@ -44,6 +44,7 @@ import io.nodekit.nkscripting.util.NKSerialize;
 import io.nodekit.nkscripting.channelbridge.NKScriptChannel;
 import io.nodekit.nkscripting.channelbridge.NKScriptMessage;
 import io.nodekit.nkscripting.NKScriptExport.NKScriptExportType;
+import io.nodekit.nkscripting.util.NKTimer;
 
 public class NKEngineAndroidWebView extends WebViewClient implements NKScriptContext, NKScriptMessage.Controller {
 
@@ -190,6 +191,11 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         String script1 = NKStorage.getResource("lib-scripting/nkscripting.js");
 
+        if (script1 != null && script1.isEmpty()) {
+            NKLogging.log("Failed to read provision script: nkscripting", NKLogging.Level.Error);
+            return;
+        }
+
         this.injectJavaScript(new NKScriptSource(script1, "io.nodekit.scripting/NKScripting/nkscripting.js", "nkscripting"));
 
         String appjs = NKStorage.getResource("lib-scripting/init_androidwebview.js");
@@ -200,20 +206,35 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         String script3 = NKStorage.getResource("lib-scripting/promise.js");
 
-        if (script3.isEmpty()) {
+        if (script3 != null && script3.isEmpty()) {
             NKLogging.log("Failed to read provision script: promise", NKLogging.Level.Error);
             return;
         }
 
         this.injectJavaScript(new NKScriptSource(script3, "io.nodekit.scripting/NKScripting/promise.js", "Promise"));
 
+        loadTimerScript();
+
         NKStorage.attachTo(this);
+        NKTimer.attachTo(this);
 
         callback.NKScriptEngineDidLoad(this);
 
        if (_webview.getVisibility() != View.VISIBLE)
           _webview.loadDataWithBaseURL("", "<html><body>NodeKit Running</body></html>", "text/html", "UTF-8", "");
 
+    }
+
+    private void loadTimerScript() throws Exception {
+
+        String timerSource = NKStorage.getResource("lib-scripting/timer.js");
+
+        if (timerSource == null || timerSource.isEmpty()) {
+            NKLogging.log("Failed to read provision script: timer", NKLogging.Level.Error);
+            return;
+        }
+
+        this.injectJavaScript(new NKScriptSource(timerSource, "io.nodekit.scripting/NKScripting/timer.js", "io.nodekit.scripting.timer"));
     }
 
 

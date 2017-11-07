@@ -30,9 +30,19 @@ const secondFunction = require("./subdirectory/index")
 
 secondFunction()
 
+var last = now()
 setInterval(function() {
-    console.log("timer fire")
-}, 2000)
+    const newTime = now()
+    console.error("delta :" + (newTime - last))
+    last = newTime
+}, 2500)
+
+setTimeout(function() {
+    console.log("single timer fire")
+    setTimeout(function() {
+        console.log("second timer fire")
+    }, 2000)
+}, 15000)
 
 nodekit.on("ready", function() {
 
@@ -47,3 +57,6 @@ nodekit.on("ready", function() {
            console.log("Server running");
      });
 
+function now() {
+  return new Date().getTime()
+}

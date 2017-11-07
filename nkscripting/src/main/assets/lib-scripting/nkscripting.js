@@ -135,7 +135,6 @@
 
     NKScripting.createConstructor = function (channelName, namespace, type) {
         var ctor = function () {
-            debugger;
             // Instance must can be accessed by native object in global context.
             var ctor = this.constructor;
             //    while (ctor[ctor.$lastInstID] != undefined)
