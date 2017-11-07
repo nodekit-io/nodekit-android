@@ -30,8 +30,11 @@ const secondFunction = require("./subdirectory/index")
 
 secondFunction()
 
+var last = now()
 setInterval(function() {
-    console.log("recurring timer fire")
+    const newTime = now()
+    console.error("delta :" + (newTime - last))
+    last = newTime
 }, 2500)
 
 setTimeout(function() {
@@ -54,3 +57,6 @@ nodekit.on("ready", function() {
            console.log("Server running");
      });
 
+function now() {
+  return new Date().getTime()
+}
