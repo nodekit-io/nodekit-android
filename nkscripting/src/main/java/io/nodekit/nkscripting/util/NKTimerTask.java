@@ -28,7 +28,7 @@ public class NKTimerTask {
     private NKScriptValue callback;
     private boolean isRepeating;
 
-    NKTimerTask(@NonNull ScheduledFuture<?> future, @NonNull NKScriptValue callback, @NonNull boolean isRepeating) {
+    NKTimerTask(@NonNull ScheduledFuture<?> future, @NonNull NKScriptValue callback, boolean isRepeating) {
         this.future = future;
         this.callback = callback;
         this.isRepeating = isRepeating;
