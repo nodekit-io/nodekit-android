@@ -191,6 +191,11 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
         String script1 = NKStorage.getResource("lib-scripting/nkscripting.js");
 
+        if (script1 != null && script1.isEmpty()) {
+            NKLogging.log("Failed to read provision script: nkscripting", NKLogging.Level.Error);
+            return;
+        }
+
         this.injectJavaScript(new NKScriptSource(script1, "io.nodekit.scripting/NKScripting/nkscripting.js", "nkscripting"));
 
         String appjs = NKStorage.getResource("lib-scripting/init_androidwebview.js");
