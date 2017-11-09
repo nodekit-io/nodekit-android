@@ -31,10 +31,15 @@ const secondFunction = require("./subdirectory/index")
 secondFunction()
 
 var last = now()
-setInterval(function() {
+var counter = 0
+var timerId = setInterval(function() {
     const newTime = now()
     console.error("delta :" + (newTime - last))
     last = newTime
+    counter += 1
+    if (counter == 5) {
+        clearTimeout(timerId)
+    }
 }, 2500)
 
 setTimeout(function() {
