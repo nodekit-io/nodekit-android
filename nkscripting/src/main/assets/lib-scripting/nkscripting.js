@@ -222,7 +222,10 @@
                 '$operand': operand,
                 '$target': this.$instanceID || 0
             });
-            return JSON.parse(result, JSON.dateParser);
+
+            if (result != 'undefined') {
+                return JSON.parse(result, JSON.dateParser);
+            }
         }
         else
             this.$channel.postMessage({
