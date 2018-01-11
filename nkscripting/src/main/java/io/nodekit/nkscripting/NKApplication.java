@@ -89,14 +89,8 @@ public class NKApplication {
             params.width = 0;
             params.height = 0;
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                params.flags = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-            } else {
-                params.flags = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-            }
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                params.flags = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
             }
 
             windowManager.addView(webView, params);
