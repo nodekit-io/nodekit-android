@@ -89,6 +89,10 @@ public class NKApplication {
             params.width = 0;
             params.height = 0;
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            }
+
             windowManager.addView(webView, params);
 
         } else {
