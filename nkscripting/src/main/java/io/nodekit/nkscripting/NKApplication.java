@@ -77,6 +77,7 @@ public class NKApplication {
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                     android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
                     android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_PHONE,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     PixelFormat.TRANSLUCENT
@@ -89,13 +90,13 @@ public class NKApplication {
             params.height = 0;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                layoutParams.flags = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+                params.flags = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
             } else {
-                layoutParams.flags = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+                params.flags = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                layoutParams.flags = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                params.flags = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
             }
 
             windowManager.addView(webView, params);
