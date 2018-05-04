@@ -36,6 +36,7 @@ import io.nodekit.nkscripting.NKScriptSource;
 import io.nodekit.nkscripting.NKApplication;
 import io.nodekit.nkscripting.NKScriptValue;
 import io.nodekit.nkscripting.util.NKCallback;
+import io.nodekit.nkscripting.util.NKDisposable;
 import io.nodekit.nkscripting.util.NKLogging;
 import io.nodekit.nkscripting.util.NKStorage;
 import io.nodekit.nkscripting.util.NKSerialize;
@@ -76,6 +77,7 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
     private ArrayList<NKScriptSource> _sourceList;
     protected ArrayList<NKScriptValue> _injectedPlugins;
     private HashMap<String, NKScriptMessage.Handler> _scriptMessageHandlers;
+    private ArrayList<NKDisposable> disposables = new ArrayList<>();
 
     private Boolean isReady = false;
     private NKScriptContextDelegate callback;
@@ -119,6 +121,11 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
 
     @Override
     public void tearDown() {
+
+        for (NKDisposable disposable : disposables) {
+            disposable.dispose();
+        }
+        disposables.clear();
 
         _webview.getSettings().setJavaScriptEnabled(false);
         _webview.stopLoading();
@@ -249,6 +256,10 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
         else
             bridge = NKScriptExportType.NKScriptExport;
 
+        if (plugin instanceof NKDisposable) {
+            disposables.add((NKDisposable) plugin);
+        }
+
         switch (bridge) {
             case NKScriptExport:
 
@@ -261,8 +272,6 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
                 {
                     scriptValue = channel.bindPlugin(plugin, ns, options);
                 }
-
-                _injectedPlugins.add(scriptValue);
 
                 NKLogging.log("NKNodeKit Plugin loaded with NKScripting channel at " + ns, NKLogging.Level.Info);
 
@@ -300,7 +309,10 @@ public class NKEngineAndroidWebView extends WebViewClient implements NKScriptCon
     }
 
     public void evaluateJavaScript(String javaScriptString, NKCallback<String> callback) throws Exception {
-       this._webview.evaluateJavascript(javaScriptString, callback);
+        if (this._webview == null) {
+            return;
+        }
+        this._webview.evaluateJavascript(javaScriptString, callback);
     }
 
     public void injectJavaScript(NKScriptSource source) throws Exception {
