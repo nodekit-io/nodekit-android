@@ -36,7 +36,7 @@ import io.nodekit.nkscripting.NKScriptExport;
 import io.nodekit.nkscripting.NKScriptValue;
 
 
-public class NKTimer implements NKScriptExport {
+public class NKTimer implements NKScriptExport, NKDisposable {
 
     private static String JS_NAMPESPACE = "NodeKitTimer";
 
@@ -103,6 +103,12 @@ public class NKTimer implements NKScriptExport {
 
             task.cancel();
         }
+    }
+
+    @Override
+    public void dispose() {
+        clearAllTimers();
+        tasks = new HashMap<>();
     }
 
     void clearAllTimers() {
