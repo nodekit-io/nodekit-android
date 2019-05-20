@@ -199,12 +199,6 @@ public class NKStorage implements NKScriptExport {
 
     public static InputStream getStream(String fileName) {
 
-        try {
-            return NKApplication.getAppContext().getAssets().open(getPath_(fileName));
-        } catch (IOException e) {
-            NKLogging.log(e);
-        }
-
         for (String search : searchPaths) {
             try {
                 File joinedPath = new File(search, fileName);
@@ -213,7 +207,12 @@ public class NKStorage implements NKScriptExport {
             } catch (IOException e) {
                 NKLogging.log(e);
             }
+        }
 
+        try {
+            return NKApplication.getAppContext().getAssets().open(getPath_(fileName));
+        } catch (IOException e) {
+            NKLogging.log(e);
         }
 
         NKLogging.log("NKNodeKit Error reading " + fileName , NKLogging.Level.Error);
