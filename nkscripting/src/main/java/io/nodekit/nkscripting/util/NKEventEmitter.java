@@ -32,7 +32,7 @@ public class NKEventEmitter
 
     // helper classes (internal)
 
-    protected interface NKEventSubscription
+    public interface NKEventSubscription
     {
         void remove() throws Exception ;
     }
