@@ -11,8 +11,8 @@
       <module fileurl="file:///Volumes/DATA/Projects/nodekit-android/nkelectro/nkelectro.iml" filepath="/Volumes/DATA/Projects/nodekit-android/nkelectro/nkelectro.iml" />
       <module fileurl="file://$PROJECT_DIR$/nkscripting/nkscripting.iml" filepath="$PROJECT_DIR$/nkscripting/nkscripting.iml" />
       <module fileurl="file:///Volumes/DATA/Projects/nodekit-android/nkscripting/nkscripting.iml" filepath="/Volumes/DATA/Projects/nodekit-android/nkscripting/nkscripting.iml" />
-      <module fileurl="file:///Volumes/DATA/Projects/nodekit-android/nodekit-android.iml" filepath="/Volumes/DATA/Projects/nodekit-android/nodekit-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/nodekit-android.iml" filepath="$PROJECT_DIR$/nodekit-android.iml" />
+      <module fileurl="file:///Volumes/DATA/Projects/nodekit-android/nodekit-android.iml" filepath="/Volumes/DATA/Projects/nodekit-android/nodekit-android.iml" />
     </modules>
   </component>
 </project>
