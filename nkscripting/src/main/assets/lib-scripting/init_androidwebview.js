@@ -24,14 +24,39 @@ process.type = "main"
 process.versions = {}
 
 this.console = this.console || function () { };
-console.log = function (msg, label) { NKScriptingBridge.log(msg, "Info", label || {}) };
-console.log.debug = function (msg, label) { NKScriptingBridge.log(msg, "Debug", label || {}) };
-console.log.info = function (msg, label) { NKScriptingBridge.log(msg, "Info", label || {}) };
-console.log.notice = function (msg, label) { NKScriptingBridge.log(msg, "Notice", label || {}) };
-console.log.warning = function (msg, label) { NKScriptingBridge.log(msg, "Warning", label || {}) };
-console.log.error = function (msg, label) { NKScriptingBridge.log(msg, "Error", label || {}) };
-console.log.critical = function (msg, label) { NKScriptingBridge.log(msg, "Critical", label || {}) };
-console.log.emergency = function (msg, label) { NKScriptingBridge.log(msg, "Emergency", label || {}) };
+
+console.log = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Info", {})
+};
+console.log.debug = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Debug", {})
+};
+console.log.info = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Info", {})
+};
+console.log.notice = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Notice", {})
+};
+console.log.warning = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Warning", {})
+};
+console.log.error = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Error", {})
+};
+console.log.critical = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Critical", {})
+};
+console.log.emergency = function () {
+  const msg = Array.prototype.slice.call(arguments).join(" ");
+  NKScriptingBridge.log(msg, "Emergency", {})
+};
 console.warn = console.log.warning;
 console.error = console.log.error;
 console.info = console.log.info;
