@@ -23,7 +23,7 @@ import android.webkit.JavascriptInterface;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.nodekit.nkscripting.NKScriptValue;
+import io.nodekit.nkscripting.NKScriptValueImpl;
 import io.nodekit.nkscripting.util.NKEventEmitter;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.util.NKEventHandler;
@@ -39,7 +39,9 @@ final class NKE_IpcRenderer
 
         NKE_IpcRenderer principal = new NKE_IpcRenderer(context.id());
 
-        NKScriptValue jsv = context.loadPlugin(principal, "io.nodekit.electro.ipcRenderer", options);
+        context.loadPlugin(principal, "io.nodekit.electro.ipcRenderer", options);
+
+        NKScriptValueImpl jsv = new NKScriptValueImpl("io.nodekit.electro.ipcRenderer", context);
 
         principal.initWithJSValue(jsv);
     }
@@ -49,7 +51,7 @@ final class NKE_IpcRenderer
     NKE_BrowserWindow _window;
     int _id;
 
-    private NKScriptValue jsValue;
+    private NKScriptValueImpl jsValue;
 
     private NKE_IpcRenderer(int id) throws Exception {
         _id = id;
@@ -61,7 +63,7 @@ final class NKE_IpcRenderer
 
     }
 
-    private void initWithJSValue(NKScriptValue jsv)  {
+    private void initWithJSValue(NKScriptValueImpl jsv)  {
 
         this.jsValue = jsv;
 

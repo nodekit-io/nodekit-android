@@ -23,6 +23,7 @@ import java.util.Map;
 
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKScriptValue;
+import io.nodekit.nkscripting.NKScriptValueImpl;
 import io.nodekit.nkscripting.util.NKEventHandler;
 
 abstract class NKE_WebContents {
@@ -43,13 +44,13 @@ abstract class NKE_WebContents {
 
         _browserWindow.events.on("NKE.DidFinishLoad", new NKEventHandler<String>() {
             protected void call(String event, String item) {
-                NKScriptValue.invokeMethodForObject(this, "emit", new String[]{"did-finish-load"});
+                NKScriptValueImpl.invokeMethodForObject(this, "emit", new String[]{"did-finish-load"});
             }
         });
 
         _browserWindow.events.on("NKE.DidFailLoading", new NKEventHandler<String>() {
             protected void call(String event, String item) {
-                NKScriptValue.invokeMethodForObject(this, "emit", new String[]{"did-fail-loading"});
+                NKScriptValueImpl.invokeMethodForObject(this, "emit", new String[]{"did-fail-loading"});
             }
         });
 
@@ -61,7 +62,7 @@ abstract class NKE_WebContents {
     {
         _browserWindow.events.on("NKE.IPCReplytoMain", new NKEventHandler<NKE_Event>() {
             protected void call(String event, NKE_Event item) {
-                NKScriptValue.invokeMethodForObject(this, "emit", new Object[]{"NKE.IPCReplytoMain", item.getsender(), item.getchannel(), item.getreplyId(), item.getarg()[0]});
+                NKScriptValueImpl.invokeMethodForObject(this, "emit", new Object[]{"NKE.IPCReplytoMain", item.getsender(), item.getchannel(), item.getreplyId(), item.getarg()[0]});
             }
         });
     }

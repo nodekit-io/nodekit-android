@@ -33,14 +33,14 @@ import java.util.ArrayList;
 import android.content.res.AssetFileDescriptor;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKApplication;
-import io.nodekit.nkscripting.NKScriptExport;
 import 	android.content.pm.PackageManager;
 import 	android.content.pm.ApplicationInfo;
 import android.content.res.AssetManager;
 import java.io.File;
 import java.io.FileInputStream;
+import android.webkit.JavascriptInterface;
 
-public class NKStorage implements NKScriptExport {
+public class NKStorage {
 
     private static long installedTimeStamp;
 
@@ -57,7 +57,6 @@ public class NKStorage implements NKScriptExport {
         }
     }
 
-    // NKScriptExport
     public static void attachTo( NKScriptContext context) throws Exception
     {
         HashMap<String,Object> options = new HashMap<String, Object>();

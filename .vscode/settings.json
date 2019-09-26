@@ -1,0 +1,9 @@
+{
+    "java.configuration.updateBuildConfiguration": "disabled",
+    "files.associations": {
+        "bitset": "cpp",
+        "functional": "cpp",
+        "__mutex_base": "cpp",
+        "memory": "cpp"
+    }
+}

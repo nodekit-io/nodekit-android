@@ -1,1 +1,1 @@
-include ':app', ':nkscripting', ':nkelectro', ':nkcore'
+include ':app', ':engine-common', ':engine-jsc', ':apptest', ':nkscripting',':nkscriptingchannel', ':nkelectro', ':nkcore'

@@ -22,7 +22,9 @@ import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import java.util.HashMap;
 
-import io.nodekit.nkscripting.engines.androidwebview.NKEngineAndroidWebView;
+import io.nodekit.nkscripting.engines.NKEngineAndroidWebView;
+import io.nodekit.nkscripting.engines.NKEngineExternal;
+import io.nodekit.engine.JSContext;   // common class name used by engine-jsc, engine-v8, engine-hermes, engine-quickjs 
 
 public class NKScriptContextFactory   
 {
@@ -30,9 +32,10 @@ public class NKScriptContextFactory
     public enum NKTypeEngine
     {
         WebView,
-        // Native webview provided by Android OS
-        CrossWalk
-        // open source embedded V8 engine
+        // Native webview provided by Android OS, always available but version dependent on age of phone
+        External,
+        // V8, JavaScriptCore, Hermes, or QuickJS used dependent on engine AAR selected by consuming app
+
     }
 
     public static SparseArray<Object> _contexts = new SparseArray<Object>();
@@ -48,20 +51,21 @@ public class NKScriptContextFactory
         NKTypeEngine engine = NKTypeEngine.WebView;
 
         if (options.containsKey("NKS.Engine"))
-
             engine = (NKTypeEngine)options.get("NKS.Engine");
         else
-            engine = NKTypeEngine.WebView;
+            engine = NKTypeEngine.External;
+
+        int id = NKScriptContextFactory.sequenceNumber++;
 
         switch(engine)
         {
             case WebView:
-                NKEngineAndroidWebView.createContextWebView(options, callback);
+                NKEngineAndroidWebView.createContextWebView(id, options, callback);
                 break;
-            case CrossWalk:
-                throw new UnsupportedOperationException("CrossWalk not suported in NKScripting Lite");
-        }
+            case External:
+                JSContext jscontext = new JSContext();
+                NKEngineExternal context = new NKEngineExternal(id, jscontext, options, callback);
+                break;
+         }
     }
 }
-
-

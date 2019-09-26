@@ -1,17 +1,17 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.novoda.bintray-release'
 
 group='com.github.nodekit-io'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.3'
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 26
-        versionCode 32
-        versionName "2.1.0"
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
     }
     buildTypes {
         release {
@@ -23,6 +23,17 @@ android {
 
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
-    testImplementation 'junit:junit:4.12'
-    api "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
+    implementation project(':engine-common')
+    implementation project(':engine-jsc')
+    
+    implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
+}
+
+publish {
+    userOrg = 'nodekit-io'
+    groupId = 'io.nodekit'
+    artifactId = project.name
+    publishVersion = "$rootProject.versionName"
+    desc = 'NodeKit NKScripting (lite) for Android'
+    website = 'https://github.com/nodekit-io/nodekit-android'
 }

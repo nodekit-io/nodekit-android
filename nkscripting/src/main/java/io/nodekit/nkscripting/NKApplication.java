@@ -65,7 +65,7 @@ public class NKApplication {
             throw new RuntimeException("Must call NKApplication.setAppContext before creating an NKScriptContext");
         }
 
-        WebView.setWebContentsDebuggingEnabled(true);
+       // WebView.setWebContentsDebuggingEnabled(true);
 
         WebView webView = new WebView(mContext);
         webView.getSettings().setJavaScriptEnabled(true);

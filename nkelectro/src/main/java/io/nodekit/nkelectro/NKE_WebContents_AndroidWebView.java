@@ -37,7 +37,7 @@ import android.net.Uri;
 import io.nodekit.nkscripting.NKApplication;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.NKScriptValue;
-import io.nodekit.nkscripting.engines.androidwebview.NKEngineAndroidWebView;
+import io.nodekit.nkscripting.engines.NKEngineAndroidWebView;
 import io.nodekit.nkscripting.util.NKLogging;
 import io.nodekit.nkelectro.NKE_Protocol.ProtocolHandler;
 

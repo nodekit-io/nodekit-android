@@ -27,7 +27,7 @@ import io.nodekit.nkscripting.NKScriptExport;
 import io.nodekit.nkscripting.util.NKEventEmitter;
 import io.nodekit.nkscripting.util.NKEventHandler;
 import io.nodekit.nkscripting.NKScriptContext;
-import io.nodekit.nkscripting.NKScriptValue;
+import io.nodekit.nkscripting.NKScriptValueImpl;
 import java.util.HashMap;
 import java.util.Map;
 import io.nodekit.nkscripting.util.NKLogging;
@@ -42,18 +42,20 @@ final class NKE_App implements NKScriptExport
 
         NKE_App app = new NKE_App();
 
-        NKScriptValue jsv = context.loadPlugin(app, "io.nodekit.electro.app", options);
+        context.loadPlugin(app, "io.nodekit.electro.app", options);
+
+        NKScriptValueImpl jsv = new NKScriptValueImpl("io.nodekit.electro.app", context);
 
         app.initWithJSValue(jsv);
     }
 
     private static int windowCount;
 
-    private NKScriptValue jsValue;
+    private NKScriptValueImpl jsValue;
 
     private static NKEventEmitter events = NKEventEmitter.global;
 
-    private void initWithJSValue(NKScriptValue jsv) throws Exception {
+    private void initWithJSValue(NKScriptValueImpl jsv) throws Exception {
 
         this.jsValue = jsv;
 

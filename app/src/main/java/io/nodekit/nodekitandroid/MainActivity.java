@@ -35,7 +35,6 @@ import io.nodekit.nkscripting.NKScriptContextFactory;
 import io.nodekit.nkscripting.NKScriptSource;
 import io.nodekit.nkscripting.util.NKLogging;
 
-import io.nodekit.nkelectro.NKElectro;
 import io.nodekit.nkscripting.util.NKStorage;
 import io.nodekit.nkscripting.util.NKEventEmitter;
 
@@ -77,7 +76,6 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
     void start() {
 
         if (!checkDrawOverlayPermission()) {
-
             return;
         }
 
@@ -87,6 +85,7 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
         catch (Exception e) {
             Log.v("NodeKitAndroid", e.toString());
         }
+        
     }
 
     void stop() {
@@ -132,11 +131,11 @@ public class MainActivity extends Activity implements NKScriptContext.NKScriptCo
         this.context = context;
 
         HashMap<String, Object> optionsDefault = new HashMap<String, Object>();
-        try {
+       /* try {
             NKElectro.addToContext(context, optionsDefault);
         } catch (Exception e) {
             NKLogging.log(e);
-        }
+        }*/
 
     }
 

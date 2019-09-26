@@ -18,8 +18,9 @@
 
 package io.nodekit.nkscripting;
 
-import io.nodekit.nkscripting.channelbridge.NKScriptMessage;
-import io.nodekit.nkscripting.util.NKCallback;
+import io.nodekit.nkscripting.NKScriptValue;
+
+import android.webkit.ValueCallback;
 
 import java.util.HashMap;
 
@@ -29,7 +30,7 @@ public interface NKScriptContext
 
     NKScriptValue loadPlugin(Object plugin, String ns, HashMap<String, Object> options) throws Exception ;
 
-    void evaluateJavaScript(String javaScriptString, NKCallback<String> callback) throws Exception ;
+    void evaluateJavaScript(String javaScriptString, ValueCallback<String> callback) throws Exception ;
 
     void injectJavaScript(NKScriptSource source) throws Exception ;
 

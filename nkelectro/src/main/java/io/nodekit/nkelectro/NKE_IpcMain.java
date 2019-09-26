@@ -23,7 +23,7 @@ import android.webkit.JavascriptInterface;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.nodekit.nkscripting.NKScriptValue;
+import io.nodekit.nkscripting.NKScriptValueImpl;
 import io.nodekit.nkscripting.util.NKEventEmitter;
 import io.nodekit.nkscripting.NKScriptContext;
 import io.nodekit.nkscripting.util.NKEventHandler;
@@ -38,16 +38,18 @@ final class NKE_IpcMain
 
         NKE_IpcMain ipc = new NKE_IpcMain();
 
-        NKScriptValue jsv = context.loadPlugin(ipc, "io.nodekit.electro.ipcMain", options);
+        context.loadPlugin(ipc, "io.nodekit.electro.ipcMain", options);
+
+        NKScriptValueImpl jsv = new NKScriptValueImpl("io.nodekit.electro.ipcMain", context);
 
         ipc.initWithJSValue(jsv);
     }
 
     private static NKEventEmitter globalEvents = NKEventEmitter.global;
 
-    private NKScriptValue jsValue;
+    private NKScriptValueImpl jsValue;
 
-    private void initWithJSValue(NKScriptValue jsv) {
+    private void initWithJSValue(NKScriptValueImpl jsv) {
 
         this.jsValue = jsv;
 

@@ -32,11 +32,10 @@ import java.util.concurrent.TimeUnit;
 
 import io.nodekit.nkscripting.NKApplication;
 import io.nodekit.nkscripting.NKScriptContext;
-import io.nodekit.nkscripting.NKScriptExport;
 import io.nodekit.nkscripting.NKScriptValue;
 
 
-public class NKTimer implements NKScriptExport, NKDisposable {
+public class NKTimer implements NKDisposable {
 
     private static String JS_NAMPESPACE = "NodeKitTimer";
 
