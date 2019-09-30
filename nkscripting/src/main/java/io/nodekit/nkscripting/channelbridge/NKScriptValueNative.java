@@ -18,7 +18,6 @@
 
 package io.nodekit.nkscripting.channelbridge;
 
-import io.nodekit.nkscripting.util.NKCallback;
 import io.nodekit.nkscripting.NKScriptValue;
 import io.nodekit.nkscripting.channelbridge.NKScriptTypeInfo.NKScriptTypeInfoMemberInfo;
 import java.lang.reflect.*;
@@ -114,7 +113,7 @@ class NKScriptValueNative extends NKScriptValue {
         proxy = null;
     }
 
-    void invokeNativeMethod(String method, Object[] args, NKCallback<Object> callback) {
+    void invokeNativeMethod(String method, Object[] args, android.webkit.ValueCallback<Object> callback) {
         if (proxy == null)
         {
             return;
@@ -196,7 +195,7 @@ class NKScriptValueNative extends NKScriptValue {
 
     // OVERRIDE METHODS IN NKScriptValue
 
-    public void invokeMethod(String method, Object[] args, NKCallback<String> completionHandler) {
+    public void invokeMethod(String method, Object[] args, android.webkit.ValueCallback<String> completionHandler) {
 
         if (proxy == null)
         {

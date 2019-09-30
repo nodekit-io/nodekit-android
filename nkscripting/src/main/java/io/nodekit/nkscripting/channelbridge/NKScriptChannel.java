@@ -208,7 +208,7 @@ public class NKScriptChannel implements NKScriptMessage.Handler {
                         ArrayList<Object> al = (ArrayList<Object>)body.get("$operand");
 
                         // Invoke method
-                        // TODO:  ASYNC RESULT
+                        // TODO:  SYNC RESULT
                         obj.invokeNativeMethod(opcode, al.toArray(), null);
 
                     } else {

@@ -13,41 +13,42 @@ See [nodekit-io/nodekit-darwin](https://github.com/nodekit-io/nodekit-darwin) fo
 
 # {NK} NodeKit
 
-[![JitPack compatible](https://img.shields.io/badge/JitPack.io-compatible-4BC51D.svg?style=flat-square)](https://jitpack.io/com/github/nodekit-io/nodekit-android/v1.0.3/build.log)
+[![JCenter registered](https://img.shields.io/badge/jcenter-hosted-4BC51D.svg?style=flat-square)](https://bintray.com/beta/#/nodekit-io/maven/nkscripting?tab=overview)
 [![Join the chat at https://gitter.im/nodekit-io/nodekit](https://img.shields.io/badge/Chat-on_gitter-46BC99.svg?style=flat-square)](https://gitter.im/nodekit-io/nodekit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![{NK} Roadmap](https://img.shields.io/badge/OpenSource-roadmap-DE3B30.svg?style=flat-square)](http://roadmap.nodekit.io)
 [![@Contact](https://img.shields.io/badge/Contact-@nodekitio-4DA6FD.svg?style=flat-square)](https://twitter.com/nodekitio)
 
+## Building
+
+### Pre-requities
+
+This repository requires [`git-lfs`](https://github.com/git-lfs/git-lfs/wiki/Installation) for cloning and building (in preparation for v3.x which includes external ES6 engine binaries).
+
+### Build
+
+Update version number in root `build.gradle`
+
+``` bash
+./gradlew clean build
+```
+
+### Upload to bintray/jcenter
+
+``` bash
+./gradlew bintrayUpload -PbintrayUser=REPLACEWITH_BINTRAY_USERNAME -PbintrayKey=REPLACEWITH_BINTRAY_API_KEY -PdryRun=false
+```
+
 ## Installation
 
-Make sure you have Node.js installed (between v4 and v6).
 
-Optimal: nstall Node.js version 6.7 or later and npm 3.10 or later using nvm
-
-``` bash
-npm install -g nodekit
-```
-
-## Create a Sample Application
-
-``` bash
-nodekit create myapp io.nodekit.myapp myapp
-cd myapp
-nodekit platform add android
-nodekit build
-nodekit run
-```
-
-## Incorporate into Existing Android Gradle Application
+### Incorporate into Existing Android Gradle Application
 
 ### Root build.gradle
 
 ``` gradle
 allprojects {
     repositories {
-        mavenCentral();
         jcenter()
-        maven { url "https://jitpack.io" }
     }
 }
 ```
@@ -57,11 +58,13 @@ allprojects {
 
 ``` gradle
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.github.nodekit-io.nodekit-android:nkscripting:v1.0.29'
-    compile 'com.github.nodekit-io.nodekit-android:nkelectro:v1.0.29'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'io.nodekit:nkscripting:2.3.0'
+    implementation 
 }
 ```
+
+Replace `engine-jsc` with `engine-hermes` or `engine-v8` (on roadmap)
 
 ## Simple Configuration
 
@@ -155,6 +158,7 @@ Apache 2.0
 We went for platform specific code to allow searching by language on GitHub to show up appropriately (e.g., trending repositories in Swift, C#), to allow separate version numbers for minor platform-specific changes, and because the repositories are in essence not dependent on each other, but rather complementary language ports with the same functionality and API.
 
 ## News
+* (September 2019) v2.3 Updated to API 27, Studio 3.5; published to JCenter instead of Jitpack 
 * (May 2017) Enhanced logging
 * (October 2016) Command line tooling added for Android
 * (September 2016) Initial Android release (NKScripting and NKElectro only)

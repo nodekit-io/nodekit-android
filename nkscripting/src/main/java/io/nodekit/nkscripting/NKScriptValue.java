@@ -22,7 +22,6 @@ import android.support.annotation.Nullable;
 
 import java.util.HashMap;
 
-import io.nodekit.nkscripting.util.NKCallback;
 import io.nodekit.nkscripting.util.NKLogging;
 import io.nodekit.nkscripting.util.NKSerialize;
 
@@ -75,12 +74,12 @@ public class NKScriptValue {
         this.context = context;
     }
 
-    public void callWithArguments(Object[] arguments, NKCallback<String> completionHandler) {
+    public void callWithArguments(Object[] arguments, android.webkit.ValueCallback<String> completionHandler) {
         String exp = this.scriptForCallingMethod(null, arguments);
         this.evaluateExpression(exp, completionHandler);
     }
 
-    public void invokeMethod(String method, Object[] arguments, NKCallback<String> completionHandler) {
+    public void invokeMethod(String method, Object[] arguments, android.webkit.ValueCallback<String> completionHandler) {
         String exp = this.scriptForCallingMethod(method, arguments);
         this.evaluateExpression(exp, completionHandler);
     }
@@ -99,12 +98,12 @@ public class NKScriptValue {
         this.evaluateExpression(exp, null);
     }
 
-    public void hasProperty(String property, NKCallback<String> completionHandler) {
+    public void hasProperty(String property, android.webkit.ValueCallback<String> completionHandler) {
         String exp = scriptForFetchingProperty(property) + "!= undefined";
         this.evaluateExpression(exp, null);
     }
 
-    public void valueForProperty(String property, NKCallback<String> completionHandler) {
+    public void valueForProperty(String property, android.webkit.ValueCallback<String> completionHandler) {
         String exp = scriptForFetchingProperty(property);
         this.evaluateExpression(exp, null);
     }
@@ -113,7 +112,7 @@ public class NKScriptValue {
         this.evaluateExpression(scriptForUpdatingProperty(forProperty, value), null);
     }
 
-    public void valueAtIndex(int index, NKCallback<String> completionHandler) {
+    public void valueAtIndex(int index, android.webkit.ValueCallback<String> completionHandler) {
         this.evaluateExpression(this.namespace + "[" + index + "]", completionHandler);
     }
 
@@ -176,7 +175,7 @@ public class NKScriptValue {
 
     }
 
-    private void evaluateExpression(String expression, NKCallback<String> completionHandler )
+    private void evaluateExpression(String expression, android.webkit.ValueCallback<String> completionHandler )
     {
         try {
 
