@@ -59,7 +59,7 @@ allprojects {
 ``` gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'io.nodekit:nkscripting:2.3.0'
+    implementation 'io.nodekit:nkscripting:2.3.1'
     implementation 
 }
 ```
@@ -158,6 +158,7 @@ Apache 2.0
 We went for platform specific code to allow searching by language on GitHub to show up appropriately (e.g., trending repositories in Swift, C#), to allow separate version numbers for minor platform-specific changes, and because the repositories are in essence not dependent on each other, but rather complementary language ports with the same functionality and API.
 
 ## News
+* (September 2019) v2.3.1 Added caching of zip files in NKStorage 
 * (September 2019) v2.3 Updated to API 27, Studio 3.5; published to JCenter instead of Jitpack 
 * (May 2017) Enhanced logging
 * (October 2016) Command line tooling added for Android

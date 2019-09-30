@@ -178,7 +178,6 @@ public class NKScriptValue {
     private void evaluateExpression(String expression, android.webkit.ValueCallback<String> completionHandler )
     {
         try {
-
             this.context.evaluateJavaScript(expression, completionHandler);
         } catch (Exception e) {
              NKLogging.log(e);
