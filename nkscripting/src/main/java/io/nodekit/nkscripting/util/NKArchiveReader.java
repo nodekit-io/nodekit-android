@@ -20,6 +20,7 @@ package io.nodekit.nkscripting.util;
 
 import android.webkit.JavascriptInterface;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
@@ -27,70 +28,66 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import android.util.LruCache;
 
 class NKArchiveReader {
 
- /* static class NKLruCache<K, V> extends LinkedHashMap<K, V> {
+    static int cacheSize = 3;
+    static LruCache<String, ZipFile> zipCache = new LruCache<String, ZipFile>(cacheSize) {
 
-       private final int mMaxEntries;
+        protected void entryRemoved(boolean evicted, String key, ZipFile oldValue, ZipFile newValue) {
+            try {
+                oldValue.close();
+            } catch (java.io.IOException e) {
+                NKLogging.log(e);
+            }
+        }
+    };
 
-        public LruCache(int maxEntries) {
-            super(maxEntries + 1, 1.0f, true );
-            mMaxEntries = maxEntries;
+    ZipFile getZipFile(String archive) {
+
+        ZipFile zipFile = zipCache.get(archive);
+
+        if (zipFile == null) {
+            File file = NKStorage.getFile(archive);
+            if (file == null) { return null; };
+            try {
+                zipFile = new ZipFile(file);
+                zipCache.put(archive, zipFile);
+            } catch (java.io.IOException e) {
+                NKLogging.log(e);
+            }
+
         }
 
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-            return size() > mMaxEntries;
-        }
-    }
-
-    static NKArchiveReader create() {
-
-         NKLruCache<String, Object> cacheCDirs = new NKLruCache<>(10);
-         NKLruCache<String, Object> cacheArchiveData = new NKLruCache<>(10);
-
-        return new NKArchiveReader(cacheCDirs, cacheArchiveData);
+        return zipFile;
 
     }
-
-
-    private NKLruCache<String, ZipInputStream> _cacheCDirs;
-    private NKLruCache<String, ZipInputStream> _cacheArchiveData;
-
-
-    private NKArchiveReader( NKLruCache<String, Object> cacheCDirs, NKLruCache<String, Object> cacheArchiveData){
-        this._cacheCDirs = cacheCDirs;
-        this._cacheArchiveData = cacheArchiveData;
-    } */
 
     byte[] dataForFile(String archive, String filename) {
 
         byte[] result = null;
 
         try  {
-            InputStream stream = NKStorage.getStream(archive);
-            if (stream == null) return result;
+            ZipFile zipFile = getZipFile(archive);
+            if (zipFile == null) return result;
 
-            ZipInputStream zip = new ZipInputStream(stream);
-            ZipEntry ze;
-            while ((ze = zip.getNextEntry()) != null) {
+            ZipEntry ze = zipFile.getEntry(filename);
 
-                if (!ze.isDirectory()) {
-                    if (ze.getName().equals(filename)) {
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        byte[] buffer = new byte[1024];
-                        int count;
-                        while ((count = zip.read(buffer)) != -1) {
-                            baos.write(buffer, 0, count);
-                        }
-                        result = baos.toByteArray();
-                        break;
+            if (!ze.isDirectory()) {
 
-                    }
+                InputStream zip = zipFile.getInputStream(ze);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int count;
+                while ((count = zip.read(buffer)) != -1) {
+                    baos.write(buffer, 0, count);
                 }
-            }
-            zip.close();
+                result = baos.toByteArray();
+                 
+                }
+            
         } catch(Exception e) {
             NKLogging.log(e);
         }
@@ -102,22 +99,15 @@ class NKArchiveReader {
         boolean result = false;
 
         try  {
-            InputStream stream =  NKStorage.getStream(archive);
-            if (stream == null) return result;
+            ZipFile zipFile = getZipFile(archive);
+            if (zipFile == null) return result;
 
-            ZipInputStream zip = new ZipInputStream(stream);
-            ZipEntry ze;
-            while ((ze = zip.getNextEntry()) != null) {
+            ZipEntry ze = zipFile.getEntry(filename);
 
-                if(!ze.isDirectory()) {
-
-                    if (ze.getName().equals(filename)){
+            if (ze != null && !ze.isDirectory()) {
                         result = true;
-                        break;
-                    }
-                }
             }
-            zip.close();
+            
         } catch(Exception e) {
             NKLogging.log(e);
         }
@@ -130,27 +120,20 @@ class NKArchiveReader {
         Map<String, Object> result = null;
 
         try  {
-            InputStream stream =  NKStorage.getStream(archive);
-            if (stream == null) return result;
+            ZipFile zipFile = getZipFile(archive);
+            if (zipFile == null) return result;
 
-            ZipInputStream zip = new ZipInputStream(stream);
-            ZipEntry ze;
-            while ((ze = zip.getNextEntry()) != null) {
+            ZipEntry ze = zipFile.getEntry(filename);
 
-                    if (ze.getName().equals(filename)){
-                        result = stat(archive, filename, ze);
-                        break;
-                    }
-
+            if (ze != null && !ze.isDirectory()) {
+                    result = stat(archive, filename, ze);
             }
-            zip.close();
         } catch(Exception e) {
             NKLogging.log(e);
         }
         return result;
 
     }
-
 
     ArrayList<String> getDirectory(String archive, String foldername) {
         ArrayList<String> result = new ArrayList<>();
@@ -197,4 +180,3 @@ class NKArchiveReader {
     }
 
 }
-

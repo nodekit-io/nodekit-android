@@ -21,7 +21,6 @@ package io.nodekit.nkscripting.channelbridge;
 import java.lang.reflect.*;
 import java.util.Locale;
 import io.nodekit.nkscripting.util.NKLogging;
-import io.nodekit.nkscripting.util.NKCallback;
 
 class NKScriptInvocation
 {
@@ -65,14 +64,12 @@ class NKScriptInvocation
         }
     }
 
-    void callAsync(Method method, Object[] args, NKCallback callback)  {
+    void callAsync(Method method, Object[] args, android.webkit.ValueCallback callback)  {
         try {
             if (callback != null)
                 method.invoke(target, args, callback);
             else
                 method.invoke(target, args);
-
-            //  method.invoke(target, unwrapArgs(method, args), callback);
         } catch (Exception e)
         {
             NKLogging.log(e);

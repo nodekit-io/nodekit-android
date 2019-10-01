@@ -18,10 +18,12 @@
 
 package io.nodekit.nkscripting.util;
 
+import android.content.Context;
 import android.webkit.JavascriptInterface;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -46,8 +48,9 @@ public class NKStorage implements NKScriptExport {
 
     static  {
         try {
-            PackageManager pm = NKApplication.getAppContext().getPackageManager();
-            String s = NKApplication.getAppContext().getPackageName();
+            Context context = NKApplication.getAppContext();
+            PackageManager pm = context.getPackageManager();
+            String s = context.getPackageName();
             ApplicationInfo appInfo = pm.getApplicationInfo(s, 0);
             String appFile = appInfo.sourceDir;
             installedTimeStamp = new File(appFile).lastModified();
@@ -195,6 +198,53 @@ public class NKStorage implements NKScriptExport {
         }
 
         return sb.toString();
+    }
+
+    public static File getFile(String fileName) {
+
+        for (String search : searchPaths) {
+            try {
+                File joinedPath = new File(search, fileName);
+                if (joinedPath.exists())
+                    return joinedPath;
+            } catch (Exception e) {
+                NKLogging.log(e);
+            }
+        }
+
+        try {
+            String asset = getPath_(fileName);
+            return cacheFromAsset_( NKApplication.getAppContext(), asset);
+        } catch (Exception e) {
+            NKLogging.log(e);
+        }
+
+        NKLogging.log("NKNodeKit Error reading file " + fileName , NKLogging.Level.Error);
+
+        return null;
+    }
+
+    private static File cacheFromAsset_(Context context, String asset) {
+        File f = new File(context.getCacheDir(), asset);
+        if (f.exists()) {
+            f.delete();
+        }
+        try {
+
+            InputStream is = context.getAssets().open(asset);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(buffer);
+            fos.close();
+            NKLogging.log("cached " +  asset);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return f;
     }
 
     public static InputStream getStream(String fileName) {

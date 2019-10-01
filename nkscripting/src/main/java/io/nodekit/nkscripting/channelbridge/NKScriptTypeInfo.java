@@ -21,7 +21,6 @@ package io.nodekit.nkscripting.channelbridge;
 import java.lang.reflect.*;
 import java.util.*;
 import android.webkit.JavascriptInterface;
-import io.nodekit.nkscripting.util.NKCallback;
 import io.nodekit.nkscripting.util.NKLogging;
 
 @SuppressWarnings("unchecked")
@@ -180,7 +179,7 @@ class NKScriptTypeInfo<T> {
                 sb.append(":");
                 sb.append(param.getSimpleName().toLowerCase());
 
-                if (param == NKCallback.class)
+                if (param == android.webkit.ValueCallback.class)
                 {
                     isAsyncCallback = true;
                 }
